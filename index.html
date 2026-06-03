@@ -503,15 +503,23 @@ async function doRegister(){
 }
 
 async function loadProfile(){
-  const res=await fetch(`${SB}/rest/v1/profiles?id=eq.${currentUser.id}`,{
-    headers:{'apikey':KEY,'Authorization':'Bearer '+authToken}
-  });
-  const data=await res.json();
-  if(!data||!data.length){
-    // ไม่มี profile → สร้างใหม่เป็น worker
+  try{
+    const res=await fetch(`${SB}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
+      headers:{
+        'apikey':KEY,
+        'Authorization':'Bearer '+authToken,
+        'Content-Type':'application/json'
+      }
+    });
+    const text=await res.text();
+    const data=JSON.parse(text);
+    if(data&&data.length>0){
+      currentProfile=data[0];
+    } else {
+      currentProfile={name:currentUser.email,role:'worker'};
+    }
+  }catch(e){
     currentProfile={name:currentUser.email,role:'worker'};
-  } else {
-    currentProfile=data[0];
   }
 }
 
