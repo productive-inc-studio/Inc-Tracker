@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorkTracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px;min-height:100vh}
+:root{
+  --bg:#f5f5f3;--card:#fff;--border:#e0e0dc;--text:#1a1a1a;--muted:#888;
+  --high:#e24b4a;--highbg:#fcebeb;
+  --med:#ba7517;--medbg:#faeeda;
+  --low:#3b6d11;--lowbg:#eaf3de;
+  --over:#a32d2d;--overbg:#fde8e8;
+  --warn:#c47a00;--warnbg:#fff3cd;
+}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;position:sticky;top:0;z-index:100}
+.logo{font-weight:700;font-size:15px}
+.nav{display:flex;gap:2px;margin-left:8px}
+.nav button{background:none;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s}
+.nav button.active{background:#1a1a1a;color:#fff}
+.nav button:hover:not(.active){background:#f1efe8}
+.main{flex:1;padding:20px;max-width:1300px;width:100%;margin:0 auto}
+
+/* Summary */
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.stat-val{font-size:22px;font-weight:700}
+.stat.overdue .stat-val{color:var(--over)}
+
+/* Deadline alert */
+.deadline-bar{background:var(--warnbg);border:1px solid #ffe082;border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.deadline-bar .dl-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.deadline-bar .dl-title{font-size:12px;font-weight:700;color:var(--warn);margin-bottom:6px}
+.dl-chips{display:flex;flex-wrap:wrap;gap:6px}
+.dl-chip{background:#fff;border:1px solid #ffe082;border-radius:20px;padding:3px 10px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.dl-chip:hover{background:#fffde7}
+.dl-chip .dl-days{background:var(--warnbg);color:var(--warn);border-radius:20px;padding:1px 6px;font-weight:700;font-size:10px}
+.dl-chip .dl-days.today{background:#fde8e8;color:var(--over)}
+
+/* Controls */
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.month-nav{display:flex;align-items:center;gap:8px}
+.month-nav button{background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+.month-nav button:hover{background:#f1efe8}
+.month-label{font-size:15px;font-weight:600;min-width:130px;text-align:center}
+.filter-group{display:flex;gap:3px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:3px}
+.filter-btn{background:none;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s}
+.filter-btn.active{background:#1a1a1a;color:#fff}
+.add-btn{margin-left:auto;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px}
+.add-btn:hover{opacity:.85}
+
+/* Board */
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.col{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;min-height:360px}
+.col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.col-title{font-size:13px;font-weight:600}
+.col-count{background:#f1efe8;color:#888;border-radius:20px;padding:2px 8px;font-size:11px}
+
+/* Task card */
+.task-card{background:#f9f9f8;border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:8px;position:relative;transition:border-color .15s}
+.task-card:hover{border-color:#bbb}
+.task-card.overdue{border-left:3px solid var(--over)}
+.task-card.warn-deadline{border-left:3px solid var(--warn)}
+.task-name{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.4;cursor:pointer}
+.task-name:hover{text-decoration:underline}
+.task-meta{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500}
+.badge.high{background:var(--highbg);color:var(--high)}
+.badge.medium{background:var(--medbg);color:var(--med)}
+.badge.low{background:var(--lowbg);color:var(--low)}
+.badge.type{background:#f1efe8;color:#5f5e5a}
+.badge.overdue-badge{background:var(--overbg);color:var(--over)}
+.badge.warn-badge{background:var(--warnbg);color:var(--warn)}
+.task-info{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.task-date{font-size:11px;color:var(--muted)}
+.task-worker-badge{font-size:11px;background:#ebebea;border-radius:20px;padding:2px 8px;color:#444;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Inline status buttons */
+.status-row{display:flex;gap:4px;margin-top:7px;padding-top:7px;border-top:1px solid var(--border)}
+.s-btn{flex:1;border:1px solid var(--border);background:#fff;border-radius:6px;padding:5px 4px;font-size:10px;cursor:pointer;text-align:center;transition:all .15s;color:#555;font-weight:500}
+.s-btn:hover{background:#f1efe8}
+.s-btn.active-todo{background:#f1efe8;color:#1a1a1a;border-color:#bbb;font-weight:700}
+.s-btn.active-inprogress{background:#e6f1fb;color:#185fa5;border-color:#b5d4f4;font-weight:700}
+.s-btn.active-done{background:#e1f5ee;color:#0f6e56;border-color:#8ed4c2;font-weight:700}
+
+/* Timer */
+.timer-row{display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+.timer-display{font-size:11px;font-weight:700;font-family:monospace;min-width:52px;color:#444}
+.timer-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;transition:background .15s}
+.timer-btn:hover{background:#f1efe8}
+.timer-btn.running{background:#e6f1fb;color:#185fa5;border-color:#b5d4f4}
+.progress-bar{height:3px;background:#ebe9e3;border-radius:2px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;background:#1a1a1a;border-radius:2px;transition:width .3s}
+
+/* Calendar */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.cal-head{background:#f1efe8;padding:8px;text-align:center;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.cal-day{background:#fff;min-height:90px;padding:6px}
+.cal-day.other-month{background:#fafaf8}
+.cal-day.today{background:#f9f9f0}
+.cal-day-num{font-size:12px;font-weight:600;margin-bottom:4px;color:var(--muted)}
+.cal-day.today .cal-day-num{background:#1a1a1a;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.cal-chip{font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%;display:block}
+.cal-chip.high{background:var(--highbg);color:var(--high)}
+.cal-chip.medium{background:var(--medbg);color:var(--med)}
+.cal-chip.low{background:var(--lowbg);color:var(--low)}
+.cal-chip.done{background:#e1f5ee;color:#0f6e56}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:24px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:700}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;color:#1a1a1a;width:100%;outline:none;transition:border-color .15s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#888}
+.field textarea{resize:vertical;min-height:60px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.btn-cancel{background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px}
+.btn-save{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 20px;cursor:pointer;font-size:13px}
+.btn-delete{background:none;border:1px solid var(--highbg);color:var(--high);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;margin-right:auto}
+
+/* Worker selector */
+.worker-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.worker-chip{border:1px solid var(--border);background:#fff;border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;transition:all .15s;color:#555}
+.worker-chip:hover{border-color:#888}
+.worker-chip.selected{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.worker-add-row{display:flex;gap:6px;margin-top:6px}
+.worker-add-row input{flex:1;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;outline:none;font-family:inherit}
+.worker-add-row input:focus{border-color:#888}
+.worker-add-row button{background:#f1efe8;border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;white-space:nowrap}
+.worker-add-row button:hover{background:#e8e6de}
+.manage-workers-btn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 0;margin-top:4px;text-decoration:underline}
+
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">WorkTracker</div>
+    <div class="nav">
+      <button class="active" onclick="switchPage('dashboard')">Dashboard</button>
+      <button onclick="switchPage('calendar')">Calendar</button>
+    </div>
+  </div>
+  <div class="main">
+    <!-- DASHBOARD -->
+    <div id="page-dashboard">
+      <div class="summary" id="summary-bar"></div>
+      <div id="deadline-alert"></div>
+      <div class="controls">
+        <div class="month-nav">
+          <button onclick="changeMonth(-1)">&#8249;</button>
+          <span class="month-label" id="month-label"></span>
+          <button onclick="changeMonth(1)">&#8250;</button>
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn active" onclick="setFilter('all',this)">ทั้งหมด</button>
+          <button class="filter-btn" onclick="setFilter('today',this)">วันนี้</button>
+          <button class="filter-btn" onclick="setFilter('week',this)">สัปดาห์นี้</button>
+        </div>
+        <button class="add-btn" onclick="openModal()">+ เพิ่มงาน</button>
+      </div>
+      <div class="board">
+        <div class="col">
+          <div class="col-header"><span class="col-title">📋 To Do</span><span class="col-count" id="count-todo">0</span></div>
+          <div id="col-todo"></div>
+        </div>
+        <div class="col">
+          <div class="col-header"><span class="col-title">⚙️ In Progress</span><span class="col-count" id="count-inprogress">0</span></div>
+          <div id="col-inprogress"></div>
+        </div>
+        <div class="col">
+          <div class="col-header"><span class="col-title">✅ Done</span><span class="col-count" id="count-done">0</span></div>
+          <div id="col-done"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="page-calendar" class="hidden">
+      <div class="controls">
+        <div class="month-nav">
+          <button onclick="changeMonth(-1)">&#8249;</button>
+          <span class="month-label" id="cal-month-label"></span>
+          <button onclick="changeMonth(1)">&#8250;</button>
+        </div>
+        <button class="add-btn" onclick="openModal()">+ เพิ่มงาน</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay hidden" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">เพิ่มงานใหม่</span>
+      <button class="close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>ชื่องาน *</label>
+        <input id="f-name" placeholder="ชื่องาน">
+      </div>
+      <div class="field">
+        <label>ประเภทงาน</label>
+        <select id="f-type">
+          <option>Graphic Design</option><option>Content</option><option>Motion</option>
+          <option>Editor</option><option>Planning</option><option>Meeting</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Priority</label>
+        <select id="f-priority">
+          <option value="high">🔴 High</option>
+          <option value="medium" selected>🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>สถานะ</label>
+        <select id="f-status">
+          <option value="todo">To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Progress (%)</label>
+        <input id="f-progress" type="number" min="0" max="100" value="0">
+      </div>
+      <div class="field">
+        <label>Due Date</label>
+        <input id="f-due" type="date">
+      </div>
+      <div class="field">
+        <label>Deadline</label>
+        <input id="f-deadline" type="date">
+      </div>
+
+      <!-- Worker picker -->
+      <div class="field form-full">
+        <label>Worker</label>
+        <div class="worker-picker" id="worker-picker"></div>
+        <div class="worker-add-row">
+          <input id="worker-new-input" placeholder="เพิ่มชื่อใหม่..." onkeydown="if(event.key==='Enter')addWorkerFromInput()">
+          <button onclick="addWorkerFromInput()">+ เพิ่ม</button>
+        </div>
+        <button class="manage-workers-btn" onclick="openManageWorkers()">จัดการรายชื่อ</button>
+      </div>
+
+      <div class="field form-full">
+        <label>Note</label>
+        <textarea id="f-note" placeholder="หมายเหตุ / รายละเอียด"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-delete hidden" id="btn-delete" onclick="deleteTask()">ลบงาน</button>
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-save" onclick="saveTask()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manage Workers Modal -->
+<div class="overlay hidden" id="manage-overlay" onclick="if(event.target.id==='manage-overlay')closeManageWorkers()">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header">
+      <span class="modal-title">จัดการรายชื่อ Worker</span>
+      <button class="close-btn" onclick="closeManageWorkers()">&times;</button>
+    </div>
+    <div id="manage-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <input id="manage-new" placeholder="ชื่อใหม่..." style="flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')addWorkerFromManage()">
+      <button onclick="addWorkerFromManage()" style="background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px">เพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS_TH=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const DAYS_TH=['อา','จ','อ','พ','พฤ','ศ','ส'];
+
+let tasks=JSON.parse(localStorage.getItem('wt-tasks')||'[]');
+let workers=JSON.parse(localStorage.getItem('wt-workers')||'["ตัวเอง","ทีม A","ทีม B"]');
+let timers={};
+let currentMonth=new Date().getMonth();
+let currentYear=new Date().getFullYear();
+let filterMode='all';
+let editId=null;
+let currentPage='dashboard';
+let selectedWorker='';
+
+function saveData(){localStorage.setItem('wt-tasks',JSON.stringify(tasks));}
+function saveWorkers(){localStorage.setItem('wt-workers',JSON.stringify(workers));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+
+function switchPage(p){
+  currentPage=p;
+  document.getElementById('page-dashboard').classList.toggle('hidden',p!=='dashboard');
+  document.getElementById('page-calendar').classList.toggle('hidden',p!=='calendar');
+  document.querySelectorAll('.nav button').forEach((b,i)=>{
+    b.classList.toggle('active',(i===0&&p==='dashboard')||(i===1&&p==='calendar'));
+  });
+  render();
+}
+
+function changeMonth(d){
+  currentMonth+=d;
+  if(currentMonth>11){currentMonth=0;currentYear++;}
+  if(currentMonth<0){currentMonth=11;currentYear--;}
+  render();
+}
+
+function setFilter(f,el){
+  filterMode=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function todayStr(){
+  const t=new Date();
+  return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+}
+
+function dateDiffDays(dateStr){
+  const t=new Date();t.setHours(0,0,0,0);
+  const d=new Date(dateStr+'T00:00:00');
+  return Math.round((d-t)/(1000*60*60*24));
+}
+
+function isToday(dateStr){if(!dateStr)return false;return dateDiffDays(dateStr)===0;}
+function isThisWeek(dateStr){
+  if(!dateStr)return false;
+  const t=new Date();const mon=new Date(t);mon.setDate(t.getDate()-t.getDay()+1);mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);
+  const d=new Date(dateStr+'T00:00:00');return d>=mon&&d<=sun;
+}
+function isInMonth(task){
+  const due=task.due||task.deadline;if(!due)return true;
+  const d=new Date(due+'T00:00:00');return d.getMonth()===currentMonth&&d.getFullYear()===currentYear;
+}
+function isOverdue(task){
+  if(task.status==='done')return false;
+  const ref=task.deadline||task.due;if(!ref)return false;
+  return dateDiffDays(ref)<0;
+}
+function warnDeadline(task){
+  if(task.status==='done')return false;
+  const ref=task.deadline||task.due;if(!ref)return false;
+  const d=dateDiffDays(ref);return d>=0&&d<=3;
+}
+
+function filterTasks(){
+  return tasks.filter(t=>{
+    if(!isInMonth(t))return false;
+    const ref=t.due||t.deadline;
+    if(filterMode==='today')return isToday(ref);
+    if(filterMode==='week')return isThisWeek(ref);
+    return true;
+  });
+}
+
+function fmtTime(sec){
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+  return[h,m,s].map(x=>String(x).padStart(2,'0')).join(':');
+}
+
+function startTimer(id){
+  if(timers[id])return;
+  timers[id]=setInterval(()=>{
+    const t=tasks.find(t=>t.id===id);
+    if(t){t.elapsed=(t.elapsed||0)+1;saveData();updateTimerDisplay(id);}
+  },1000);
+  const btn=document.getElementById('tbtn-'+id);
+  if(btn){btn.textContent='⏹ Stop';btn.className='timer-btn running';}
+}
+function stopTimer(id){
+  clearInterval(timers[id]);delete timers[id];
+  const btn=document.getElementById('tbtn-'+id);
+  if(btn){btn.textContent='▶ Start';btn.className='timer-btn';}
+}
+function toggleTimer(id){if(timers[id])stopTimer(id);else startTimer(id);}
+function resetTimer(id){
+  stopTimer(id);
+  const t=tasks.find(t=>t.id===id);if(t){t.elapsed=0;saveData();}
+  const el=document.getElementById('tdisp-'+id);if(el)el.textContent='00:00:00';
+}
+function updateTimerDisplay(id){
+  const t=tasks.find(t=>t.id===id);
+  const el=document.getElementById('tdisp-'+id);if(el&&t)el.textContent=fmtTime(t.elapsed||0);
+}
+
+function setStatus(id,status){
+  const t=tasks.find(t=>t.id===id);
+  if(!t)return;
+  t.status=status;
+  if(status==='done'&&t.progress<100)t.progress=100;
+  saveData();render();
+}
+
+function taskCard(task){
+  const over=isOverdue(task);
+  const warn=!over&&warnDeadline(task);
+  const prog=Math.min(100,Math.max(0,task.progress||0));
+  const running=!!timers[task.id];
+  const ref=task.deadline||task.due;
+  let dateLabel='';
+  if(ref){
+    const d=dateDiffDays(ref);
+    if(d<0)dateLabel=`<span style="color:var(--over);font-weight:600">เกิน ${Math.abs(d)} วัน</span>`;
+    else if(d===0)dateLabel=`<span style="color:var(--over);font-weight:600">วันนี้!</span>`;
+    else if(d<=3)dateLabel=`<span style="color:var(--warn);font-weight:600">อีก ${d} วัน</span>`;
+    else dateLabel=`<span style="color:var(--muted)">${ref}</span>`;
+  }
+  const cls=['task-card',over?'overdue':warn?'warn-deadline':''].filter(Boolean).join(' ');
+  return `<div class="${cls}">
+    <div class="task-name" onclick="openModal('${task.id}')">${task.name}</div>
+    <div class="task-meta">
+      <span class="badge ${task.priority}">${task.priority==='high'?'High':task.priority==='medium'?'Medium':'Low'}</span>
+      <span class="badge type">${task.type}</span>
+      ${over?'<span class="badge overdue-badge">Overdue</span>':warn?'<span class="badge warn-badge">ใกล้ครบ</span>':''}
+    </div>
+    <div class="task-info">
+      <span class="task-date">${dateLabel}</span>
+      ${task.worker?`<span class="task-worker-badge">👤 ${task.worker}</span>`:''}
+    </div>
+    ${prog>0?`<div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>`:''}
+    <div class="status-row">
+      <button class="s-btn ${task.status==='todo'?'active-todo':''}" onclick="setStatus('${task.id}','todo')">📋 To Do</button>
+      <button class="s-btn ${task.status==='inprogress'?'active-inprogress':''}" onclick="setStatus('${task.id}','inprogress')">⚙️ In Progress</button>
+      <button class="s-btn ${task.status==='done'?'active-done':''}" onclick="setStatus('${task.id}','done')">✅ Done</button>
+    </div>
+    <div class="timer-row">
+      <span class="timer-display" id="tdisp-${task.id}">${fmtTime(task.elapsed||0)}</span>
+      <button class="timer-btn${running?' running':''}" id="tbtn-${task.id}" onclick="toggleTimer('${task.id}')">${running?'⏹ Stop':'▶ Start'}</button>
+      <button class="timer-btn" onclick="resetTimer('${task.id}')">↺ Reset</button>
+    </div>
+  </div>`;
+}
+
+function renderDeadlineAlert(filtered){
+  const el=document.getElementById('deadline-alert');
+  const urgent=filtered.filter(t=>t.status!=='done'&&(t.deadline||t.due)&&dateDiffDays(t.deadline||t.due)>=0&&dateDiffDays(t.deadline||t.due)<=3);
+  if(!urgent.length){el.innerHTML='';return;}
+  const chips=urgent.map(t=>{
+    const d=dateDiffDays(t.deadline||t.due);
+    const dayLbl=d===0?`<span class="dl-days today">วันนี้</span>`:`<span class="dl-days">อีก ${d} วัน</span>`;
+    return `<span class="dl-chip" onclick="openModal('${t.id}')">${dayLbl} ${t.name}</span>`;
+  }).join('');
+  el.innerHTML=`<div class="deadline-bar"><div class="dl-icon">⚠️</div><div><div class="dl-title">งานใกล้ถึง Deadline ภายใน 3 วัน</div><div class="dl-chips">${chips}</div></div></div>`;
+}
+
+function renderDashboard(){
+  const filtered=filterTasks();
+  const todo=filtered.filter(t=>t.status==='todo');
+  const inp=filtered.filter(t=>t.status==='inprogress');
+  const done=filtered.filter(t=>t.status==='done');
+  const over=filtered.filter(t=>isOverdue(t));
+  document.getElementById('month-label').textContent=MONTHS_TH[currentMonth]+' '+currentYear;
+  document.getElementById('summary-bar').innerHTML=`
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-val">${filtered.length}</div></div>
+    <div class="stat"><div class="stat-label">To Do</div><div class="stat-val">${todo.length}</div></div>
+    <div class="stat"><div class="stat-label">In Progress</div><div class="stat-val">${inp.length}</div></div>
+    <div class="stat"><div class="stat-label">Done</div><div class="stat-val">${done.length}</div></div>
+    <div class="stat overdue"><div class="stat-label">Overdue</div><div class="stat-val">${over.length}</div></div>`;
+  renderDeadlineAlert(filtered);
+  document.getElementById('col-todo').innerHTML=todo.map(taskCard).join('');
+  document.getElementById('col-inprogress').innerHTML=inp.map(taskCard).join('');
+  document.getElementById('col-done').innerHTML=done.map(taskCard).join('');
+  document.getElementById('count-todo').textContent=todo.length;
+  document.getElementById('count-inprogress').textContent=inp.length;
+  document.getElementById('count-done').textContent=done.length;
+}
+
+function renderCalendar(){
+  document.getElementById('cal-month-label').textContent=MONTHS_TH[currentMonth]+' '+currentYear;
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML=DAYS_TH.map(d=>`<div class="cal-head">${d}</div>`).join('');
+  const first=new Date(currentYear,currentMonth,1).getDay();
+  const days=new Date(currentYear,currentMonth+1,0).getDate();
+  const start=(first+6)%7;
+  const today=new Date();
+  for(let i=0;i<start;i++){const d=new Date(currentYear,currentMonth,1-start+i);grid.innerHTML+=`<div class="cal-day other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;}
+  for(let d=1;d<=days;d++){
+    const ds=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isT=today.getFullYear()===currentYear&&today.getMonth()===currentMonth&&today.getDate()===d;
+    const dt=tasks.filter(t=>(t.due===ds||t.deadline===ds));
+    const chips=dt.map(t=>`<span class="cal-chip ${t.status==='done'?'done':t.priority}" onclick="openModal('${t.id}')">${t.name}</span>`).join('');
+    const numEl=isT?`<div class="cal-day-num">${d}</div>`:`<div class="cal-day-num" style="color:var(--muted)">${d}</div>`;
+    grid.innerHTML+=`<div class="cal-day${isT?' today':''}">${numEl}${chips}</div>`;
+  }
+  const rem=(7-((start+days)%7))%7;
+  for(let i=1;i<=rem;i++)grid.innerHTML+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+}
+
+function render(){
+  if(currentPage==='dashboard')renderDashboard();
+  else renderCalendar();
+}
+
+/* Worker picker in modal */
+function renderWorkerPicker(selected){
+  const container=document.getElementById('worker-picker');
+  container.innerHTML=workers.map(w=>`<span class="worker-chip${selected===w?' selected':''}" onclick="selectWorker('${w}',this)">${w}</span>`).join('');
+}
+function selectWorker(name,el){
+  selectedWorker=selectedWorker===name?'':name;
+  document.querySelectorAll('.worker-chip').forEach(c=>c.classList.remove('selected'));
+  if(selectedWorker===name)el.classList.add('selected');
+}
+function addWorkerFromInput(){
+  const inp=document.getElementById('worker-new-input');
+  const val=inp.value.trim();
+  if(!val)return;
+  if(!workers.includes(val)){workers.push(val);saveWorkers();}
+  selectedWorker=val;
+  renderWorkerPicker(val);
+  inp.value='';
+}
+
+/* Manage workers modal */
+function openManageWorkers(){
+  document.getElementById('manage-overlay').classList.remove('hidden');
+  renderManageList();
+}
+function closeManageWorkers(){document.getElementById('manage-overlay').classList.add('hidden');}
+function renderManageList(){
+  document.getElementById('manage-list').innerHTML=workers.map((w,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#f9f9f8;border:1px solid var(--border);border-radius:8px;padding:8px 12px">
+      <span style="font-size:13px">👤 ${w}</span>
+      <button onclick="removeWorker(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1">&times;</button>
+    </div>`).join('');
+}
+function removeWorker(idx){
+  workers.splice(idx,1);saveWorkers();
+  renderManageList();renderWorkerPicker(selectedWorker);
+}
+function addWorkerFromManage(){
+  const inp=document.getElementById('manage-new');
+  const val=inp.value.trim();
+  if(!val||workers.includes(val))return;
+  workers.push(val);saveWorkers();inp.value='';
+  renderManageList();renderWorkerPicker(selectedWorker);
+}
+
+/* Modal open/close */
+function openModal(id){
+  editId=id||null;
+  const overlay=document.getElementById('modal-overlay');
+  if(id){
+    const t=tasks.find(t=>t.id===id);if(!t)return;
+    document.getElementById('modal-title').textContent='แก้ไขงาน';
+    document.getElementById('f-name').value=t.name||'';
+    document.getElementById('f-type').value=t.type||'Graphic Design';
+    document.getElementById('f-priority').value=t.priority||'medium';
+    document.getElementById('f-status').value=t.status||'todo';
+    document.getElementById('f-due').value=t.due||'';
+    document.getElementById('f-deadline').value=t.deadline||'';
+    document.getElementById('f-progress').value=t.progress||0;
+    document.getElementById('f-note').value=t.note||'';
+    selectedWorker=t.worker||'';
+    document.getElementById('btn-delete').classList.remove('hidden');
+  } else {
+    document.getElementById('modal-title').textContent='เพิ่มงานใหม่';
+    document.getElementById('f-name').value='';
+    document.getElementById('f-type').value='Graphic Design';
+    document.getElementById('f-priority').value='medium';
+    document.getElementById('f-status').value='todo';
+    document.getElementById('f-due').value='';document.getElementById('f-deadline').value='';
+    document.getElementById('f-progress').value=0;document.getElementById('f-note').value='';
+    selectedWorker='';
+    document.getElementById('btn-delete').classList.add('hidden');
+  }
+  renderWorkerPicker(selectedWorker);
+  overlay.classList.remove('hidden');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');editId=null;}
+function closeModalOutside(e){if(e.target.id==='modal-overlay')closeModal();}
+
+function saveTask(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name)return alert('กรุณากรอกชื่องาน');
+  const data={name,type:document.getElementById('f-type').value,priority:document.getElementById('f-priority').value,
+    status:document.getElementById('f-status').value,worker:selectedWorker,
+    due:document.getElementById('f-due').value,deadline:document.getElementById('f-deadline').value,
+    progress:parseInt(document.getElementById('f-progress').value)||0,note:document.getElementById('f-note').value.trim()};
+  if(editId){const idx=tasks.findIndex(t=>t.id===editId);if(idx>-1)tasks[idx]={...tasks[idx],...data};}
+  else tasks.push({id:uid(),elapsed:0,...data});
+  saveData();closeModal();render();
+}
+function deleteTask(){
+  if(!editId)return;
+  stopTimer(editId);tasks=tasks.filter(t=>t.id!==editId);
+  saveData();closeModal();render();
+}
+
+/* Demo data */
+if(!tasks.length){
+  const add=n=>{const d=new Date();d.setDate(d.getDate()+n);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+  tasks=[
+    {id:uid(),name:'ออกแบบ Banner โซเชียล',type:'Graphic Design',priority:'high',status:'inprogress',worker:'ตัวเอง',due:add(1),deadline:add(2),progress:60,note:'ขนาด 1:1 และ 16:9',elapsed:2340},
+    {id:uid(),name:'ตัดต่อ VDO รีวิว',type:'Editor',priority:'medium',status:'todo',worker:'ทีม A',due:add(0),deadline:add(0),progress:0,note:'',elapsed:0},
+    {id:uid(),name:'วางแผน Content เดือนหน้า',type:'Planning',priority:'medium',status:'todo',worker:'ตัวเอง',due:add(3),deadline:add(3),progress:0,note:'',elapsed:0},
+    {id:uid(),name:'ประชุมทีม Weekly',type:'Meeting',priority:'low',status:'done',worker:'ทีม B',due:add(-1),deadline:add(-1),progress:100,note:'',elapsed:1800},
+    {id:uid(),name:'Motion Graphic Intro',type:'Motion',priority:'high',status:'todo',worker:'ตัวเอง',due:add(-2),deadline:add(-1),progress:20,note:'รอ client approve',elapsed:900},
+    {id:uid(),name:'Caption IG 5 โพสต์',type:'Content',priority:'low',status:'inprogress',worker:'ทีม A',due:add(2),deadline:add(2),progress:40,note:'',elapsed:600},
+  ];
+  saveData();
+}
+
+render();
+</script>
+</body>
+</html>
