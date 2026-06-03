@@ -516,7 +516,7 @@ async function loadProfile(){
       }
     });
     const text=await res.text();
-
+None
     const data=JSON.parse(text);
     if(data&&data.length>0){
       currentProfile=data[0];
@@ -556,7 +556,7 @@ function startApp(){
   document.getElementById('user-badge').innerHTML=`<div class="user-avatar">${(p.name||'?').slice(0,2).toUpperCase()}</div><div><div class="user-name">${p.name}</div><div class="user-role">${p.role==='admin'?'👑 Admin':'👷 Worker'} [${p.role}]</div></div>`;
   loadAll();
   // restore page from hash
-
+None
 }
 
 // =========== APP ===========
@@ -784,7 +784,7 @@ function renderCheckin(){
   const isAdmin=currentProfile&&currentProfile.role==='admin';
   const myName=(currentProfile&&currentProfile.name||'').trim().toLowerCase();
   const showWorkers=isAdmin?workers:workers.filter(w=>(w.name||'').trim().toLowerCase()===myName);
-
+None
   if(!isAdmin&&showWorkers.length===0){
     $('worker-ci-list').innerHTML=`<div style="color:var(--muted);font-size:13px;padding:10px">ไม่พบชื่อ "${currentProfile.name}" ใน workers</div>`;
     return;
