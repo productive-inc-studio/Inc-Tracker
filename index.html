@@ -783,8 +783,12 @@ function renderKPI(){
 
 function renderCheckin(){
   const isAdmin=currentProfile&&currentProfile.role==='admin';
-  const myName=(currentProfile.name||'').trim().toLowerCase();
+  const myName=(currentProfile&&currentProfile.name||'').trim().toLowerCase();
   const showWorkers=isAdmin?workers:workers.filter(w=>(w.name||'').trim().toLowerCase()===myName);
+  if(!isAdmin&&showWorkers.length===0){
+    $('worker-ci-list').innerHTML=`<div style="color:var(--muted);font-size:13px;padding:10px">ไม่พบชื่อ "${currentProfile.name}" ใน workers<br>กรุณาแจ้ง Admin เพิ่มชื่อให้ตรงกัน</div>`;
+    return;
+  }
   $('worker-ci-list').innerHTML=showWorkers.map(w=>{
     const last=checkins.filter(c=>c.worker_name===w.name)[0];
     const isIn=last&&!last.check_out;
