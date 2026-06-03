@@ -202,6 +202,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
       <button onclick="switchPage('checkin')">🕐 Check-in</button>
     </div>
     <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">โหลด...</span></div>
+    <button onclick="sendDailySummary()" style="background:#06c755;color:#fff;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;white-space:nowrap">📨 ส่งสรุป LINE</button>
   </div>
   <div class="main">
     <!-- DASHBOARD -->
@@ -362,6 +363,40 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 <script>
 const SB='https://jsywdxdhycfjdbhgogjs.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzeXdkeGRoeWNmamRiaGdvZ2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTg5NjgsImV4cCI6MjA5NjA3NDk2OH0.HctVq88sFh2Nwqga5_vfey4P85bdlybEevVXDsmr8n4';
+const LINE_TOKEN='I34YN1BGaL3RyC+QjjzCQvLNq2aA+oAnMPLW1oyDajYlNU7wtB/0gdLEJe4vphMT2gx0sYA9kSFuJA851M9ZpzUwYucLLyFI4xT/2ORWAsQVAFdgOevTL5PVqknkZVMFlfWQeWhVycpWd7t10kV0owdB04t89/1O/w1cDnyilFU=';
+const LINE_GROUP='C1aa200814395279eff2c6d11c445500b';
+
+async function sendLINE(message,type='general'){
+  try{
+    await fetch('https://api.line.me/v2/bot/message/push',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+LINE_TOKEN},
+      body:JSON.stringify({to:LINE_GROUP,messages:[{type:'text',text:message}]})
+    });
+    await ins('line_logs',{type,message});
+  }catch(e){console.error('LINE error:',e);}
+}
+
+async function sendUrgentLINE(task){
+  const msg=`🔥 งานด่วน!\n\n📌 ${task.name}\n👤 Worker: ${task.worker||'ไม่ระบุ'}\n⏰ ต้องส่งภายใน 24 ชั่วโมง\n📋 ประเภท: ${task.type||'ไม่ระบุ'}\n${task.note?'📝 Note: '+task.note:''}`;
+  await sendLINE(msg,'urgent');
+  alert('✅ ส่งแจ้งเตือนไปยัง LINE group แล้วครับ');
+}
+
+async function sendDailySummary(){
+  const urgent=tasks.filter(t=>t.status!=='done'&&t.urgent);
+  const nearDead=tasks.filter(t=>t.status!=='done'&&(t.deadline||t.due)&&diff(t.deadline||t.due)>=0&&diff(t.deadline||t.due)<=3&&!t.urgent);
+  const today=todayThai();
+  const newToday=tasks.filter(t=>t.created_at&&t.created_at.startsWith(today));
+  let msg='📊 สรุปงานประจำวัน\n';
+  msg+=`📅 ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}\n\n`;
+  if(urgent.length){msg+=`🔥 งานด่วน (${urgent.length} งาน)\n`;urgent.forEach(t=>{msg+=`• ${t.name} ${t.worker?'('+t.worker+')':''}\n`;});msg+='\n';}
+  if(nearDead.length){msg+=`⚠️ ใกล้ถึง Deadline (${nearDead.length} งาน)\n`;nearDead.forEach(t=>{const d=diff(t.deadline||t.due);msg+=`• ${t.name} — ${d===0?'วันนี้!':'อีก '+d+' วัน'} ${t.worker?'('+t.worker+')':''}\n`;});msg+='\n';}
+  if(newToday.length){msg+=`🆕 งานใหม่วันนี้ (${newToday.length} งาน)\n`;newToday.forEach(t=>{msg+=`• ${t.name} ${t.worker?'('+t.worker+')':''}\n`;});msg+='\n';}
+  if(!urgent.length&&!nearDead.length&&!newToday.length){msg+='✅ ไม่มีงานด่วนหรืองานใกล้ deadline วันนี้';}
+  await sendLINE(msg,'daily');
+  alert('✅ ส่งสรุปประจำวันไปยัง LINE group แล้วครับ');
+}
 const H={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=representation'};
 const get=(t,q='')=>fetch(`${SB}/rest/v1/${t}?${q}`,{headers:H}).then(r=>r.json());
 const ins=(t,d)=>fetch(`${SB}/rest/v1/${t}`,{method:'POST',headers:H,body:JSON.stringify(d)}).then(r=>r.json());
@@ -443,6 +478,16 @@ function stopTimer(id){
 function toggleTimer(id){if(timers[id])stopTimer(id);else startTimer(id);}
 function resetTimer(id){stopTimer(id);const t=tasks.find(t=>t.id===id);if(t){t.elapsed=0;upd('tasks',id,{elapsed:0});}['td-','dtd-'].forEach(p=>{const e=$(p+id);if(e)e.textContent='00:00:00';});}
 function updTEl(id){const t=tasks.find(t=>t.id===id);['td-','dtd-'].forEach(p=>{const e=$(p+id);if(e&&t)e.textContent=fmtTime(t.elapsed||0);});}
+
+async function toggleUrgent(id){
+  const t=tasks.find(t=>t.id===id);if(!t)return;
+  t.urgent=!t.urgent;
+  sync('loading');
+  await upd('tasks',id,{urgent:t.urgent});
+  sync('ok');
+  if(t.urgent)await sendUrgentLINE(t);
+  render();
+}
 
 async function setStatus(id,status){
   const t=tasks.find(t=>t.id===id);if(!t)return;
