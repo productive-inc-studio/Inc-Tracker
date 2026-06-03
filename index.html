@@ -503,8 +503,12 @@ async function doRegister(){
 }
 
 async function loadProfile(){
-  const res=await get('profiles',`id=eq.${currentUser.id}`);
-  currentProfile=res[0]||{name:currentUser.email,role:'worker'};
+  const res=await fetch(`${SB}/rest/v1/profiles?id=eq.${currentUser.id}`,{
+    headers:{'apikey':KEY,'Authorization':'Bearer '+authToken}
+  });
+  const data=await res.json();
+  currentProfile=data[0]||{name:currentUser.email,role:'worker'};
+  console.log('profile loaded:',currentProfile);
 }
 
 async function restoreSession(){
