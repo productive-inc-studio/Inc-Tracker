@@ -478,8 +478,11 @@ async function doLogin(){
   const r=await fetch(`${SB}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify({email,password:pass})});
   const d=await r.json();
   if(d.error)return showAuthMsg(d.error_description||d.error);
-  authToken=d.access_token;currentUser=d.user;
-  localStorage.setItem('wt_token',authToken);localStorage.setItem('wt_user',JSON.stringify(currentUser));
+  authToken=d.access_token;
+  currentUser=d.user;
+  localStorage.setItem('wt_token',authToken);
+  localStorage.setItem('wt_user',JSON.stringify(currentUser));
+  await new Promise(r=>setTimeout(r,500)); // รอให้ token พร้อม
   await loadProfile();
   startApp();
 }
