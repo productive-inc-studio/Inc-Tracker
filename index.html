@@ -516,7 +516,7 @@ async function loadProfile(){
       }
     });
     const text=await res.text();
-    alert('Profile response: '+text);
+
     const data=JSON.parse(text);
     if(data&&data.length>0){
       currentProfile=data[0];
@@ -783,7 +783,8 @@ function renderKPI(){
 
 function renderCheckin(){
   const isAdmin=currentProfile&&currentProfile.role==='admin';
-  const showWorkers=isAdmin?workers:workers.filter(w=>w.name===currentProfile.name);
+  const myName=(currentProfile.name||'').trim().toLowerCase();
+  const showWorkers=isAdmin?workers:workers.filter(w=>(w.name||'').trim().toLowerCase()===myName);
   $('worker-ci-list').innerHTML=showWorkers.map(w=>{
     const last=checkins.filter(c=>c.worker_name===w.name)[0];
     const isIn=last&&!last.check_out;
