@@ -558,6 +558,7 @@ function startApp(){
   // restore page from hash
   const h=location.hash.replace('#','');
   if(['dashboard','calendar','kpi','checkin'].includes(h))switchPage(h,false);
+  else render();
 }
 
 // =========== APP ===========
@@ -785,7 +786,7 @@ function renderCheckin(){
   const isAdmin=currentProfile&&currentProfile.role==='admin';
   const myName=(currentProfile&&currentProfile.name||'').trim().toLowerCase();
   const showWorkers=isAdmin?workers:workers.filter(w=>(w.name||'').trim().toLowerCase()===myName);
-  alert(`profile: ${currentProfile.name} | role: ${currentProfile.role} | workers: ${workers.map(w=>w.name).join(',')} | match: ${showWorkers.length}`);
+
   if(!isAdmin&&showWorkers.length===0){
     $('worker-ci-list').innerHTML=`<div style="color:var(--muted);font-size:13px;padding:10px">ไม่พบชื่อ "${currentProfile.name}" ใน workers</div>`;
     return;
