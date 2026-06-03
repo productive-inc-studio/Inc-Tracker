@@ -504,7 +504,8 @@ async function doRegister(){
 
 async function loadProfile(){
   try{
-    const res=await fetch(`${SB}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`,{
+    const url=`${SB}/rest/v1/profiles?id=eq.${currentUser.id}&select=*`;
+    const res=await fetch(url,{
       headers:{
         'apikey':KEY,
         'Authorization':'Bearer '+authToken,
@@ -512,6 +513,7 @@ async function loadProfile(){
       }
     });
     const text=await res.text();
+    alert('Profile response: '+text);
     const data=JSON.parse(text);
     if(data&&data.length>0){
       currentProfile=data[0];
@@ -519,6 +521,7 @@ async function loadProfile(){
       currentProfile={name:currentUser.email,role:'worker'};
     }
   }catch(e){
+    alert('Error: '+e.message);
     currentProfile={name:currentUser.email,role:'worker'};
   }
 }
