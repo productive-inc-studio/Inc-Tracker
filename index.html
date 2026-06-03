@@ -556,9 +556,7 @@ function startApp(){
   document.getElementById('user-badge').innerHTML=`<div class="user-avatar">${(p.name||'?').slice(0,2).toUpperCase()}</div><div><div class="user-name">${p.name}</div><div class="user-role">${p.role==='admin'?'👑 Admin':'👷 Worker'} [${p.role}]</div></div>`;
   loadAll();
   // restore page from hash
-  const h=location.hash.replace('#','');
-  if(['dashboard','calendar','kpi','checkin'].includes(h))switchPage(h,false);
-  else render();
+
 }
 
 // =========== APP ===========
