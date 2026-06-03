@@ -8,6 +8,25 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px}
 :root{--border:#e0e0dc;--muted:#888;--high:#e24b4a;--highbg:#fcebeb;--med:#ba7517;--medbg:#faeeda;--low:#3b6d11;--lowbg:#eaf3de;--over:#a32d2d;--overbg:#fde8e8;--warn:#c47a00;--warnbg:#fff3cd;--due:#1a6fbf;--duebg:#e6f1fb}
+
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f5f3;padding:20px}
+.auth-box{background:#fff;border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:400px}
+.auth-logo{font-size:22px;font-weight:800;margin-bottom:6px}
+.auth-sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+.auth-tabs{display:flex;gap:2px;background:#f1efe8;border-radius:8px;padding:3px;margin-bottom:20px}
+.auth-tab{flex:1;border:none;background:none;border-radius:6px;padding:8px;cursor:pointer;font-size:13px;color:var(--muted);font-weight:500}
+.auth-tab.active{background:#fff;color:#1a1a1a;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.auth-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.auth-field label{font-size:12px;font-weight:600;color:#444}
+.auth-field input{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit;width:100%}
+.auth-field input:focus{border-color:#888}
+.auth-btn{width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.auth-btn:hover{opacity:.85}
+.auth-err{background:#fde8e8;color:var(--over);border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:12px}
+.auth-ok{background:#e1f5ee;color:#0f6e56;border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:12px}
+
+/* APP */
 .app{display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:8px;height:52px;position:sticky;top:0;z-index:50}
 .logo{font-weight:700;font-size:15px}
@@ -15,10 +34,17 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .nav button{background:none;border:none;padding:6px 11px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--muted)}
 .nav button.active{background:#1a1a1a;color:#fff}
 .nav button:hover:not(.active){background:#f1efe8}
-.sync-status{margin-left:auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.sync-status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc}
 .sync-dot.ok{background:#3b6d11}.sync-dot.loading{background:#ba7517;animation:pulse 1s infinite}.sync-dot.err{background:#e24b4a}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user-badge{display:flex;align-items:center;gap:7px;background:#f1efe8;border-radius:20px;padding:4px 12px 4px 4px}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:#1a1a1a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.user-name{font-size:12px;font-weight:600}
+.user-role{font-size:10px;color:var(--muted)}
+.logout-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--muted)}
+.logout-btn:hover{background:#fde8e8;color:var(--over)}
 .main{flex:1;padding:16px;max-width:1300px;width:100%;margin:0 auto}
 .page{display:none}.page.active{display:block}
 
@@ -46,6 +72,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .filter-group{display:flex;gap:2px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:2px}
 .filter-btn{background:none;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--muted)}
 .filter-btn.active{background:#1a1a1a;color:#fff}
+.worker-filter{border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;background:#fff;outline:none;cursor:pointer;font-family:inherit}
 .add-btn{margin-left:auto;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px}
 .add-btn:hover{opacity:.85}
 
@@ -63,7 +90,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .task-card.overdue{border-left:3px solid var(--over)}
 .task-card.warn-deadline{border-left:3px solid var(--warn)}
 .task-name{font-size:13px;font-weight:600;margin-bottom:5px;cursor:pointer;line-height:1.4}
-.task-name:hover{text-decoration:underline}
+.task-name:hover{text-decoration:underline;color:#185fa5}
 .task-meta{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
 .badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500}
 .badge.high{background:var(--highbg);color:var(--high)}
@@ -72,6 +99,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .badge.type{background:#f1efe8;color:#5f5e5a}
 .badge.overdue-badge{background:var(--overbg);color:var(--over)}
 .badge.warn-badge{background:var(--warnbg);color:var(--warn)}
+.task-note{font-size:11px;color:#666;background:#fff;border-radius:6px;padding:6px 8px;margin-bottom:6px;line-height:1.5;border:1px solid #f0ede6}
 .task-info{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .task-date{font-size:11px}
 .task-worker-badge{font-size:11px;background:#ebebea;border-radius:20px;padding:2px 8px;color:#444;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -88,6 +116,33 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .timer-btn.running{background:#e6f1fb;color:#185fa5;border-color:#b5d4f4}
 .progress-bar{height:3px;background:#ebe9e3;border-radius:2px;margin-top:5px;overflow:hidden}
 .progress-fill{height:100%;background:#1a1a1a;border-radius:2px}
+
+/* Task Detail Page */
+.detail-back{display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer;color:var(--muted);font-size:13px;width:fit-content}
+.detail-back:hover{color:#1a1a1a}
+.detail-wrap{display:grid;grid-template-columns:1fr 320px;gap:16px}
+.detail-main{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px}
+.detail-title{font-size:20px;font-weight:800;margin-bottom:12px;line-height:1.3}
+.detail-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.detail-section{margin-bottom:18px}
+.detail-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.detail-note{background:#f9f9f8;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;line-height:1.7;color:#333;white-space:pre-wrap}
+.detail-side{display:flex;flex-direction:column;gap:12px}
+.detail-info-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1efe8}
+.detail-row:last-child{border-bottom:none}
+.detail-row-label{font-size:12px;color:var(--muted)}
+.detail-row-val{font-size:12px;font-weight:600}
+.detail-progress-wrap{margin-top:10px}
+.detail-progress-bar{height:8px;background:#f1efe8;border-radius:20px;overflow:hidden;margin-top:6px}
+.detail-progress-fill{height:100%;background:#1a1a1a;border-radius:20px}
+.detail-timer-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.detail-timer-display{font-size:28px;font-weight:800;font-family:monospace;margin:10px 0}
+.detail-timer-btns{display:flex;gap:8px;justify-content:center}
+.detail-timer-btn{flex:1;border:1px solid var(--border);background:#f9f9f8;border-radius:8px;padding:8px;cursor:pointer;font-size:12px;font-weight:600}
+.detail-timer-btn:hover{background:#f1efe8}
+.detail-timer-btn.running{background:#e6f1fb;color:#185fa5;border-color:#b5d4f4}
+.edit-btn{width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:600;margin-top:4px}
 
 /* Calendar */
 .cal-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px;align-items:center}
@@ -129,15 +184,14 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .kpi-bar-fill{height:100%;background:#1a1a1a;border-radius:20px}
 .kpi-bar-time{font-size:10px;color:var(--muted);width:40px;text-align:right;flex-shrink:0}
 
-/* Check-in page */
+/* Check-in */
 .checkin-layout{display:grid;grid-template-columns:280px 1fr;gap:16px}
 .checkin-workers{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px}
 .checkin-workers h3{font-size:14px;font-weight:700;margin-bottom:14px}
 .worker-ci-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s}
-.worker-ci-item:hover{background:#f1efe8;border-color:#bbb}
+.worker-ci-item:hover{background:#f1efe8}
 .worker-ci-item.is-in{background:#e1f5ee;border-color:#8ed4c2}
 .worker-ci-avatar{width:34px;height:34px;border-radius:50%;background:#1a1a1a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-.worker-ci-info{flex:1}
 .worker-ci-name{font-size:13px;font-weight:600}
 .worker-ci-status{font-size:11px;color:var(--muted);margin-top:2px}
 .worker-ci-status.in{color:#0f6e56;font-weight:600}
@@ -151,8 +205,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .log-table td{padding:8px;font-size:12px;border-bottom:1px solid #f1efe8;vertical-align:middle}
 .log-table tr:last-child td{border-bottom:none}
 .dur-badge{background:#f1efe8;border-radius:20px;padding:2px 8px;font-size:10px}
+.section-title{font-size:16px;font-weight:700;margin-bottom:14px}
 
-/* Modal — only shown when needed */
+/* Modal */
 .modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:16px}
 .modal-wrap.open{display:flex}
 .modal{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:20px}
@@ -166,13 +221,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .field label{font-size:12px;color:var(--muted);font-weight:500}
 .field input,.field select,.field textarea{border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;background:#fff;color:#1a1a1a;width:100%;outline:none;font-family:inherit}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#888}
-.field textarea{resize:vertical;min-height:55px}
+.field textarea{resize:vertical;min-height:70px}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
 .btn-cancel{background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px}
 .btn-save{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:7px 18px;cursor:pointer;font-size:13px}
 .btn-delete{background:none;border:1px solid var(--highbg);color:var(--high);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;margin-right:auto}
-
-/* Pickers */
 .picker-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
 .pick-chip{border:1px solid var(--border);background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;cursor:pointer;color:#555;display:flex;align-items:center;gap:4px}
 .pick-chip:hover{border-color:#888}
@@ -183,22 +236,52 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .add-row button{background:#f1efe8;border:1px solid var(--border);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:12px;white-space:nowrap}
 .manage-link{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 0;margin-top:3px;text-decoration:underline}
 .loading-screen{display:flex;align-items:center;justify-content:center;height:140px;color:var(--muted);font-size:13px}
-.section-title{font-size:16px;font-weight:700;margin-bottom:14px}
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- AUTH -->
+<div id="auth-wrap" class="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-logo">WorkTracker</div>
+    <div class="auth-sub">ระบบจัดการงานและทีม</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">เข้าสู่ระบบ</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">สมัครสมาชิก</button>
+    </div>
+    <div id="auth-msg"></div>
+
+    <!-- Login -->
+    <div id="tab-login">
+      <div class="auth-field"><label>Email</label><input id="l-email" type="email" placeholder="email@example.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="auth-field"><label>Password</label><input id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="auth-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    </div>
+
+    <!-- Register -->
+    <div id="tab-register" style="display:none">
+      <div class="auth-field"><label>ชื่อ-นามสกุล</label><input id="r-name" placeholder="ชื่อของคุณ"></div>
+      <div class="auth-field"><label>Email</label><input id="r-email" type="email" placeholder="email@example.com"></div>
+      <div class="auth-field"><label>Password (อย่างน้อย 6 ตัว)</label><input id="r-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <button class="auth-btn" onclick="doRegister()">สมัครสมาชิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-wrap" class="app" style="display:none">
   <div class="topbar">
     <div class="logo">WorkTracker</div>
-    <div class="nav">
+    <div class="nav" id="main-nav">
       <button class="active" onclick="switchPage('dashboard')">📊 Dashboard</button>
       <button onclick="switchPage('calendar')">📅 Calendar</button>
       <button onclick="switchPage('kpi')">🏆 KPI</button>
       <button onclick="switchPage('checkin')">🕐 Check-in</button>
     </div>
-    <div class="sync-status">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span id="sync-label">กำลังโหลด...</span>
+    <div class="topbar-right">
+      <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">โหลด...</span></div>
+      <div class="user-badge" id="user-badge"></div>
+      <button class="logout-btn" onclick="doLogout()">ออก</button>
     </div>
   </div>
   <div class="main">
@@ -218,13 +301,22 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
           <button class="filter-btn" onclick="setFilter('today',this)">วันนี้</button>
           <button class="filter-btn" onclick="setFilter('week',this)">สัปดาห์</button>
         </div>
-        <button class="add-btn" onclick="openTaskModal()">+ เพิ่มงาน</button>
+        <select class="worker-filter" id="worker-filter" onchange="render()">
+          <option value="">👥 ทุกคน</option>
+        </select>
+        <button class="add-btn" id="add-task-btn" onclick="openTaskModal()">+ เพิ่มงาน</button>
       </div>
       <div class="board">
         <div class="col"><div class="col-header"><span class="col-title">📋 To Do</span><span class="col-count" id="count-todo">0</span></div><div id="col-todo"><div class="loading-screen">⏳ กำลังโหลด...</div></div></div>
         <div class="col"><div class="col-header"><span class="col-title">⚙️ In Progress</span><span class="col-count" id="count-inprogress">0</span></div><div id="col-inprogress"></div></div>
         <div class="col"><div class="col-header"><span class="col-title">✅ Done</span><span class="col-count" id="count-done">0</span></div><div id="col-done"></div></div>
       </div>
+    </div>
+
+    <!-- TASK DETAIL -->
+    <div id="page-detail" class="page">
+      <div class="detail-back" onclick="goBack()">← กลับ</div>
+      <div class="detail-wrap" id="detail-content"></div>
     </div>
 
     <!-- CALENDAR -->
@@ -235,6 +327,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
           <span class="month-label" id="cal-month-label"></span>
           <button onclick="changeMonth(1)">&#8250;</button>
         </div>
+        <select class="worker-filter" id="cal-worker-filter" onchange="renderCalendar()">
+          <option value="">👥 ทุกคน</option>
+        </select>
         <button class="add-btn" onclick="openTaskModal()">+ เพิ่มงาน</button>
       </div>
       <div class="cal-legend">
@@ -262,10 +357,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
     <div id="page-checkin" class="page">
       <div class="section-title">🕐 บันทึกเวลาเข้า-ออกงาน</div>
       <div class="checkin-layout">
-        <div class="checkin-workers">
-          <h3>เลือก Worker</h3>
-          <div id="worker-ci-list"></div>
-        </div>
+        <div class="checkin-workers"><h3>เลือก Worker</h3><div id="worker-ci-list"></div></div>
         <div class="checkin-log">
           <h3>ประวัติวันนี้</h3>
           <table class="log-table">
@@ -315,7 +407,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
         </div>
         <button class="manage-link" onclick="openManageWorkers()">จัดการรายชื่อ</button>
       </div>
-      <div class="field form-full"><label>Note</label><textarea id="f-note" placeholder="หมายเหตุ / รายละเอียด"></textarea></div>
+      <div class="field form-full"><label>Note / Brief</label><textarea id="f-note" placeholder="รายละเอียดงาน, brief, หมายเหตุ..."></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn-delete" id="btn-delete" style="display:none" onclick="deleteTask()">ลบงาน</button>
@@ -325,7 +417,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
   </div>
 </div>
 
-<!-- MANAGE WORKERS MODAL -->
+<!-- MANAGE WORKERS -->
 <div class="modal-wrap" id="manage-modal-wrap">
   <div class="modal modal-sm">
     <div class="modal-header">
@@ -361,52 +453,149 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 <script>
 const SB='https://jsywdxdhycfjdbhgogjs.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzeXdkeGRoeWNmamRiaGdvZ2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTg5NjgsImV4cCI6MjA5NjA3NDk2OH0.HctVq88sFh2Nwqga5_vfey4P85bdlybEevVXDsmr8n4';
-const H={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=representation'};
-const get=(t,q='')=>fetch(`${SB}/rest/v1/${t}?${q}`,{headers:H}).then(r=>r.json());
-const ins=(t,d)=>fetch(`${SB}/rest/v1/${t}`,{method:'POST',headers:H,body:JSON.stringify(d)}).then(r=>r.json());
-const upd=(t,id,d)=>fetch(`${SB}/rest/v1/${t}?id=eq.${id}`,{method:'PATCH',headers:H,body:JSON.stringify(d)});
-const del=(t,id)=>fetch(`${SB}/rest/v1/${t}?id=eq.${id}`,{method:'DELETE',headers:H});
 
+let authToken=null,currentUser=null,currentProfile=null;
+
+function authH(){return{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+(authToken||KEY),'Prefer':'return=representation'};}
+const get=(t,q='')=>fetch(`${SB}/rest/v1/${t}?${q}`,{headers:authH()}).then(r=>r.json());
+const ins=(t,d)=>fetch(`${SB}/rest/v1/${t}`,{method:'POST',headers:authH(),body:JSON.stringify(d)}).then(r=>r.json());
+const upd=(t,id,d)=>fetch(`${SB}/rest/v1/${t}?id=eq.${id}`,{method:'PATCH',headers:authH(),body:JSON.stringify(d)});
+const del=(t,id)=>fetch(`${SB}/rest/v1/${t}?id=eq.${id}`,{method:'DELETE',headers:authH()});
+
+// AUTH
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('active',i===(tab==='login'?0:1)));
+  document.getElementById('tab-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('tab-register').style.display=tab==='register'?'block':'none';
+  document.getElementById('auth-msg').innerHTML='';
+}
+
+function showAuthMsg(msg,ok=false){document.getElementById('auth-msg').innerHTML=`<div class="${ok?'auth-ok':'auth-err'}">${msg}</div>`;}
+
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim(),pass=document.getElementById('l-pass').value;
+  if(!email||!pass)return showAuthMsg('กรุณากรอก email และ password');
+  const r=await fetch(`${SB}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify({email,password:pass})});
+  const d=await r.json();
+  if(d.error)return showAuthMsg(d.error_description||d.error);
+  authToken=d.access_token;currentUser=d.user;
+  localStorage.setItem('wt_token',authToken);localStorage.setItem('wt_user',JSON.stringify(currentUser));
+  await loadProfile();
+  startApp();
+}
+
+async function doRegister(){
+  const name=document.getElementById('r-name').value.trim(),email=document.getElementById('r-email').value.trim(),pass=document.getElementById('r-pass').value;
+  if(!name||!email||!pass)return showAuthMsg('กรุณากรอกข้อมูลให้ครบ');
+  if(pass.length<6)return showAuthMsg('Password ต้องมีอย่างน้อย 6 ตัวอักษร');
+  const r=await fetch(`${SB}/auth/v1/signup`,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify({email,password:pass})});
+  const d=await r.json();
+  if(d.error)return showAuthMsg(d.error_description||d.error);
+  // สร้าง profile
+  authToken=d.access_token;currentUser=d.user;
+  await fetch(`${SB}/rest/v1/profiles`,{method:'POST',headers:authH(),body:JSON.stringify({id:currentUser.id,name,role:'worker'})});
+  // สร้าง worker entry
+  const existing=await get('workers',`name=eq.${encodeURIComponent(name)}`);
+  if(!existing.length)await ins('workers',{name});
+  localStorage.setItem('wt_token',authToken);localStorage.setItem('wt_user',JSON.stringify(currentUser));
+  await loadProfile();
+  startApp();
+}
+
+async function loadProfile(){
+  const res=await get('profiles',`id=eq.${currentUser.id}`);
+  currentProfile=res[0]||{name:currentUser.email,role:'worker'};
+}
+
+async function restoreSession(){
+  const token=localStorage.getItem('wt_token'),user=localStorage.getItem('wt_user');
+  if(!token||!user)return false;
+  authToken=token;currentUser=JSON.parse(user);
+  // verify token
+  const r=await fetch(`${SB}/auth/v1/user`,{headers:{'apikey':KEY,'Authorization':'Bearer '+token}});
+  if(!r.ok){localStorage.removeItem('wt_token');localStorage.removeItem('wt_user');return false;}
+  await loadProfile();return true;
+}
+
+function doLogout(){
+  localStorage.removeItem('wt_token');localStorage.removeItem('wt_user');
+  authToken=null;currentUser=null;currentProfile=null;
+  document.getElementById('app-wrap').style.display='none';
+  document.getElementById('auth-wrap').style.display='flex';
+  document.getElementById('auth-msg').innerHTML='';
+  location.hash='';
+}
+
+function startApp(){
+  document.getElementById('auth-wrap').style.display='none';
+  document.getElementById('app-wrap').style.display='flex';
+  // user badge
+  const p=currentProfile;
+  document.getElementById('user-badge').innerHTML=`<div class="user-avatar">${(p.name||'?').slice(0,2).toUpperCase()}</div><div><div class="user-name">${p.name}</div><div class="user-role">${p.role==='admin'?'👑 Admin':'Worker'}</div></div>`;
+  loadAll();
+  // restore page from hash
+  const h=location.hash.replace('#','');
+  if(['dashboard','calendar','kpi','checkin'].includes(h))switchPage(h,false);
+}
+
+// =========== APP ===========
 const MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const DAYS=['อา','จ','อ','พ','พฤ','ศ','ส'];
-
 let tasks=[],workers=[],types=[],checkins=[];
 let timers={};
 let cm=new Date().getMonth(),cy=new Date().getFullYear();
-let filter='all',editId=null,page='dashboard';
+let filter='all',editId=null,page='dashboard',prevPage='dashboard';
 let selWorker='',selType='',ciWorker=null;
-
 const $=id=>document.getElementById(id);
+
 function sync(s){const dot=$('sync-dot'),lbl=$('sync-label');if(s==='ok'){dot.className='sync-dot ok';lbl.textContent='ซิงค์แล้ว';}else if(s==='loading'){dot.className='sync-dot loading';lbl.textContent='กำลังซิงค์...';}else{dot.className='sync-dot err';lbl.textContent='เชื่อมต่อไม่ได้';}}
+
+function thaiNow(){
+  // UTC+7
+  const now=new Date();
+  return new Date(now.getTime()+7*60*60*1000).toISOString().replace('Z','+07:00');
+}
+function todayThai(){
+  const now=new Date(new Date().getTime()+7*60*60*1000);
+  return`${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`;
+}
 
 async function loadAll(){
   sync('loading');
   try{
-    const td=todayStr();
+    const td=todayThai();
     [tasks,workers,types,checkins]=await Promise.all([
       get('tasks','order=created_at.asc'),
       get('workers','order=created_at.asc'),
       get('task_types','order=id.asc'),
-      get('checkins',`check_in=gte.${td}T00:00:00&order=check_in.desc`)
+      get('checkins',`check_in=gte.${td}T00:00:00+07:00&order=check_in.desc`)
     ]);
+    updateWorkerFilters();
     sync('ok');render();
   }catch(e){sync('err');$('col-todo').innerHTML=`<div class="loading-screen">❌ ${e.message}</div>`;}
 }
 
+function updateWorkerFilters(){
+  const opts='<option value="">👥 ทุกคน</option>'+workers.map(w=>`<option value="${w.name}">${w.name}</option>`).join('');
+  $('worker-filter').innerHTML=opts;
+  $('cal-worker-filter').innerHTML=opts;
+}
+
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
-function todayStr(){const t=new Date();return`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;}
 function diff(ds){const t=new Date();t.setHours(0,0,0,0);return Math.round((new Date(ds+'T00:00:00')-t)/86400000);}
 function inMonth(task){const d=task.due||task.deadline;if(!d)return true;const x=new Date(d+'T00:00:00');return x.getMonth()===cm&&x.getFullYear()===cy;}
-function overdue(t){if(t.status==='done')return false;const r=t.deadline||t.due;return r&&diff(r)<0;}
+function isOverdue(t){if(t.status==='done')return false;const r=t.deadline||t.due;return r&&diff(r)<0;}
 function nearDl(t){if(t.status==='done')return false;const r=t.deadline||t.due;if(!r)return false;const d=diff(r);return d>=0&&d<=3;}
 function fmtTime(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return[h,m,sec].map(x=>String(x).padStart(2,'0')).join(':');}
 function fmtHM(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?`${h}ชม ${m}น`:`${m}น`;}
-function fmtClock(iso){if(!iso)return'-';const d=new Date(iso);return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+function fmtClock(iso){if(!iso)return'-';const d=new Date(iso);const th=new Date(d.getTime()+7*60*60*1000);return`${String(th.getUTCHours()).padStart(2,'0')}:${String(th.getUTCMinutes()).padStart(2,'0')}`;}
 function icon(name){const t=types.find(t=>t.name===name);return t?t.icon:'';}
 
-function filtered(){
+function getFiltered(){
+  const wf=$('worker-filter')?$('worker-filter').value:'';
   return tasks.filter(t=>{
     if(!inMonth(t))return false;
+    if(wf&&t.worker!==wf)return false;
     const r=t.due||t.deadline;
     if(filter==='today')return r&&diff(r)===0;
     if(filter==='week'){if(!r)return false;const d=new Date(r+'T00:00:00'),now=new Date();const mon=new Date(now);mon.setDate(now.getDate()-now.getDay()+1);mon.setHours(0,0,0,0);const sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);return d>=mon&&d<=sun;}
@@ -417,38 +606,38 @@ function filtered(){
 // Timer
 function startTimer(id){
   if(timers[id])return;
-  timers[id]=setInterval(async()=>{const t=tasks.find(t=>t.id===id);if(t){t.elapsed=(t.elapsed||0)+1;updTimerEl(id);if(t.elapsed%10===0)upd('tasks',id,{elapsed:t.elapsed});}},1000);
-  const b=$('tb-'+id);if(b){b.textContent='⏹ Stop';b.className='timer-btn running';}
+  timers[id]=setInterval(async()=>{const t=tasks.find(t=>t.id===id);if(t){t.elapsed=(t.elapsed||0)+1;updTEl(id);if(t.elapsed%10===0)upd('tasks',id,{elapsed:t.elapsed});}},1000);
+  ['tb-','dtb-'].forEach(p=>{const b=$(p+id);if(b){b.textContent='⏹ Stop';b.className=b.className.replace('timer-btn','timer-btn running').replace('detail-timer-btn','detail-timer-btn running');}});
 }
 function stopTimer(id){
   clearInterval(timers[id]);delete timers[id];
   const t=tasks.find(t=>t.id===id);if(t)upd('tasks',id,{elapsed:t.elapsed||0});
-  const b=$('tb-'+id);if(b){b.textContent='▶ Start';b.className='timer-btn';}
+  ['tb-','dtb-'].forEach(p=>{const b=$(p+id);if(b){b.textContent='▶ Start';b.className=b.className.replace(' running','');}});
 }
 function toggleTimer(id){if(timers[id])stopTimer(id);else startTimer(id);}
-function resetTimer(id){stopTimer(id);const t=tasks.find(t=>t.id===id);if(t){t.elapsed=0;upd('tasks',id,{elapsed:0});}const e=$('td-'+id);if(e)e.textContent='00:00:00';}
-function updTimerEl(id){const t=tasks.find(t=>t.id===id);const e=$('td-'+id);if(e&&t)e.textContent=fmtTime(t.elapsed||0);}
+function resetTimer(id){stopTimer(id);const t=tasks.find(t=>t.id===id);if(t){t.elapsed=0;upd('tasks',id,{elapsed:0});}['td-','dtd-'].forEach(p=>{const e=$(p+id);if(e)e.textContent='00:00:00';});}
+function updTEl(id){const t=tasks.find(t=>t.id===id);['td-','dtd-'].forEach(p=>{const e=$(p+id);if(e&&t)e.textContent=fmtTime(t.elapsed||0);});}
 
 async function setStatus(id,status){
   const t=tasks.find(t=>t.id===id);if(!t)return;
   t.status=status;if(status==='done'&&t.progress<100)t.progress=100;
-  sync('loading');await upd('tasks',id,{status,progress:t.progress});sync('ok');render();
+  sync('loading');await upd('tasks',id,{status,progress:t.progress});sync('ok');
+  if(page==='detail')renderDetail(id);else render();
 }
 
 function taskCard(t){
-  const ov=overdue(t),wn=!ov&&nearDl(t);
-  const prog=Math.min(100,Math.max(0,t.progress||0));
-  const run=!!timers[t.id];
+  const ov=isOverdue(t),wn=!ov&&nearDl(t),prog=Math.min(100,Math.max(0,t.progress||0)),run=!!timers[t.id];
   const ref=t.deadline||t.due;
   let dl='';
   if(ref){const d=diff(ref);if(d<0)dl=`<span style="color:var(--over);font-weight:600">เกิน ${Math.abs(d)} วัน</span>`;else if(d===0)dl=`<span style="color:var(--over);font-weight:600">วันนี้!</span>`;else if(d<=3)dl=`<span style="color:var(--warn);font-weight:600">อีก ${d} วัน</span>`;else dl=`<span style="color:var(--muted)">${ref}</span>`;}
   return`<div class="task-card${ov?' overdue':wn?' warn-deadline':''}">
-    <div class="task-name" onclick="openTaskModal('${t.id}')">${t.name}</div>
+    <div class="task-name" onclick="openDetail('${t.id}')">${t.name}</div>
     <div class="task-meta">
       <span class="badge ${t.priority}">${t.priority==='high'?'High':t.priority==='medium'?'Medium':'Low'}</span>
       <span class="badge type">${icon(t.type)} ${t.type||''}</span>
       ${ov?'<span class="badge overdue-badge">Overdue</span>':wn?'<span class="badge warn-badge">ใกล้ครบ</span>':''}
     </div>
+    ${t.note?`<div class="task-note">${t.note}</div>`:''}
     <div class="task-info"><span class="task-date">${dl}</span>${t.worker?`<span class="task-worker-badge">👤 ${t.worker}</span>`:''}</div>
     ${prog>0?`<div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>`:''}
     <div class="status-row">
@@ -464,13 +653,67 @@ function taskCard(t){
   </div>`;
 }
 
+function openDetail(id){
+  prevPage=page;
+  switchPage('detail',false);
+  renderDetail(id);
+  location.hash='detail-'+id;
+}
+
+function renderDetail(id){
+  const t=tasks.find(t=>t.id===id);if(!t)return;
+  const ov=isOverdue(t),wn=!ov&&nearDl(t),prog=Math.min(100,Math.max(0,t.progress||0)),run=!!timers[t.id];
+  const ref=t.deadline||t.due;
+  let dl='';
+  if(ref){const d=diff(ref);if(d<0)dl=`เกิน ${Math.abs(d)} วัน`;else if(d===0)dl=`วันนี้!`;else dl=`อีก ${d} วัน (${ref})`;}
+  $('detail-content').innerHTML=`
+    <div class="detail-main">
+      <div class="detail-title">${t.name}</div>
+      <div class="detail-meta">
+        <span class="badge ${t.priority}">${t.priority==='high'?'🔴 High':t.priority==='medium'?'🟡 Medium':'🟢 Low'}</span>
+        <span class="badge type">${icon(t.type)} ${t.type||'ไม่ระบุประเภท'}</span>
+        ${ov?'<span class="badge overdue-badge">Overdue</span>':wn?'<span class="badge warn-badge">ใกล้ครบกำหนด</span>':''}
+        <span class="badge ${t.status==='done'?'low':t.status==='inprogress'?'medium':'type'}">${t.status==='done'?'✅ Done':t.status==='inprogress'?'⚙️ In Progress':'📋 To Do'}</span>
+      </div>
+      ${t.note?`<div class="detail-section"><div class="detail-section-title">📝 Note / Brief</div><div class="detail-note">${t.note}</div></div>`:'<div style="color:var(--muted);font-size:13px">ยังไม่มี note</div>'}
+      <div class="status-row" style="margin-top:16px">
+        <button class="s-btn ${t.status==='todo'?'active-todo':''}" onclick="setStatus('${t.id}','todo')">📋 To Do</button>
+        <button class="s-btn ${t.status==='inprogress'?'active-inprogress':''}" onclick="setStatus('${t.id}','inprogress')">⚙️ In Progress</button>
+        <button class="s-btn ${t.status==='done'?'active-done':''}" onclick="setStatus('${t.id}','done')">✅ Done</button>
+      </div>
+    </div>
+    <div class="detail-side">
+      <div class="detail-info-card">
+        <div class="detail-section-title">ข้อมูลงาน</div>
+        <div class="detail-row"><span class="detail-row-label">Worker</span><span class="detail-row-val">${t.worker||'-'}</span></div>
+        <div class="detail-row"><span class="detail-row-label">Due Date</span><span class="detail-row-val">${t.due||'-'}</span></div>
+        <div class="detail-row"><span class="detail-row-label">Deadline</span><span class="detail-row-val" style="color:${ov?'var(--over)':wn?'var(--warn)':'inherit'}">${t.deadline||'-'}${dl?' ('+dl+')':''}</span></div>
+        <div class="detail-progress-wrap">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="detail-row-label">Progress</span><span class="detail-row-val">${prog}%</span></div>
+          <div class="detail-progress-bar"><div class="detail-progress-fill" style="width:${prog}%"></div></div>
+        </div>
+      </div>
+      <div class="detail-timer-card">
+        <div class="detail-section-title">⏱ เวลาที่ใช้</div>
+        <div class="detail-timer-display" id="dtd-${t.id}">${fmtTime(t.elapsed||0)}</div>
+        <div class="detail-timer-btns">
+          <button class="detail-timer-btn${run?' running':''}" id="dtb-${t.id}" onclick="toggleTimer('${t.id}')">${run?'⏹ Stop':'▶ Start'}</button>
+          <button class="detail-timer-btn" onclick="resetTimer('${t.id}')">↺ Reset</button>
+        </div>
+      </div>
+      <button class="edit-btn" onclick="openTaskModal('${t.id}')">✏️ แก้ไขงาน</button>
+    </div>`;
+}
+
+function goBack(){switchPage(prevPage);}
+
 function renderDashboard(){
-  const f=filtered();
-  const todo=f.filter(t=>t.status==='todo'),inp=f.filter(t=>t.status==='inprogress'),done=f.filter(t=>t.status==='done'),ov=f.filter(t=>overdue(t));
+  const f=getFiltered();
+  const todo=f.filter(t=>t.status==='todo'),inp=f.filter(t=>t.status==='inprogress'),done=f.filter(t=>t.status==='done'),ov=f.filter(t=>isOverdue(t));
   $('month-label').textContent=MONTHS[cm]+' '+cy;
   $('summary-bar').innerHTML=`<div class="stat"><div class="stat-label">Total</div><div class="stat-val">${f.length}</div></div><div class="stat"><div class="stat-label">To Do</div><div class="stat-val">${todo.length}</div></div><div class="stat"><div class="stat-label">In Progress</div><div class="stat-val">${inp.length}</div></div><div class="stat"><div class="stat-label">Done</div><div class="stat-val">${done.length}</div></div><div class="stat overdue"><div class="stat-label">Overdue</div><div class="stat-val">${ov.length}</div></div>`;
   const urgent=f.filter(t=>t.status!=='done'&&(t.deadline||t.due)&&diff(t.deadline||t.due)>=0&&diff(t.deadline||t.due)<=3);
-  $('deadline-alert').innerHTML=urgent.length?`<div class="deadline-bar"><div>⚠️</div><div><div class="dl-title">งานใกล้ถึง Deadline ภายใน 3 วัน</div><div class="dl-chips">${urgent.map(t=>{const d=diff(t.deadline||t.due);return`<span class="dl-chip" onclick="openTaskModal('${t.id}')"><span class="dl-days${d===0?' today':''}">${d===0?'วันนี้':'อีก '+d+' วัน'}</span>${t.name}</span>`;}).join('')}</div></div></div>`:'';
+  $('deadline-alert').innerHTML=urgent.length?`<div class="deadline-bar"><div>⚠️</div><div><div class="dl-title">งานใกล้ถึง Deadline ภายใน 3 วัน</div><div class="dl-chips">${urgent.map(t=>{const d=diff(t.deadline||t.due);return`<span class="dl-chip" onclick="openDetail('${t.id}')"><span class="dl-days${d===0?' today':''}">${d===0?'วันนี้':'อีก '+d+' วัน'}</span>${t.name}</span>`;}).join('')}</div></div></div>`:'';
   $('col-todo').innerHTML=todo.length?todo.map(taskCard).join(''):`<div class="empty-col">ไม่มีงาน</div>`;
   $('col-inprogress').innerHTML=inp.length?inp.map(taskCard).join(''):`<div class="empty-col">ไม่มีงาน</div>`;
   $('col-done').innerHTML=done.length?done.map(taskCard).join(''):`<div class="empty-col">ไม่มีงาน</div>`;
@@ -479,14 +722,16 @@ function renderDashboard(){
 
 function renderCalendar(){
   $('cal-month-label').textContent=MONTHS[cm]+' '+cy;
+  const wf=$('cal-worker-filter')?$('cal-worker-filter').value:'';
+  const filtered=wf?tasks.filter(t=>t.worker===wf):tasks;
   const g=$('cal-grid');g.innerHTML=DAYS.map(d=>`<div class="cal-head">${d}</div>`).join('');
   const first=new Date(cy,cm,1).getDay(),days=new Date(cy,cm+1,0).getDate(),start=(first+6)%7,today=new Date();
   for(let i=0;i<start;i++){const d=new Date(cy,cm,1-start+i);g.innerHTML+=`<div class="cal-day other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;}
   for(let d=1;d<=days;d++){
     const ds=`${cy}-${String(cm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isT=today.getFullYear()===cy&&today.getMonth()===cm&&today.getDate()===d;
-    const dlT=tasks.filter(t=>t.deadline===ds),duT=tasks.filter(t=>t.due===ds&&t.deadline!==ds);
-    const chips=[...dlT.map(t=>`<span class="cal-chip ${t.status==='done'?'done':'deadline'}" onclick="openTaskModal('${t.id}')">${icon(t.type)} ${t.name}</span>`),...duT.map(t=>`<span class="cal-chip ${t.status==='done'?'done':'due'}" onclick="openTaskModal('${t.id}')">${icon(t.type)} ${t.name}</span>`)].join('');
+    const dlT=filtered.filter(t=>t.deadline===ds),duT=filtered.filter(t=>t.due===ds&&t.deadline!==ds);
+    const chips=[...dlT.map(t=>`<span class="cal-chip ${t.status==='done'?'done':'deadline'}" onclick="openDetail('${t.id}')">${icon(t.type)} ${t.name}</span>`),...duT.map(t=>`<span class="cal-chip ${t.status==='done'?'done':'due'}" onclick="openDetail('${t.id}')">${icon(t.type)} ${t.name}</span>`)].join('');
     g.innerHTML+=`<div class="cal-day${isT?' today':''}"><div class="cal-day-num">${d}</div>${chips}</div>`;
   }
   const rem=(7-((start+days)%7))%7;for(let i=1;i<=rem;i++)g.innerHTML+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
@@ -494,8 +739,10 @@ function renderCalendar(){
 
 function renderKPI(){
   $('kpi-month-label').textContent=MONTHS[cm]+' '+cy;
+  const isAdmin=currentProfile&&currentProfile.role==='admin';
   const mt=tasks.filter(t=>{const r=t.due||t.deadline||t.created_at;if(!r)return false;const d=new Date(r.length>10?r:r+'T00:00:00');return d.getMonth()===cm&&d.getFullYear()===cy;});
-  const names=[...new Set([...workers.map(w=>w.name),...mt.map(t=>t.worker).filter(Boolean)])];
+  // Worker เห็นแค่ตัวเอง, Admin เห็นทุกคน
+  const names=isAdmin?[...new Set([...workers.map(w=>w.name),...mt.map(t=>t.worker).filter(Boolean)])]:[currentProfile.name];
   if(!names.length){$('kpi-grid').innerHTML='<div class="empty-col" style="padding:40px">ยังไม่มีข้อมูล</div>';return;}
   $('kpi-grid').innerHTML=names.map(name=>{
     const wt=mt.filter(t=>t.worker===name);
@@ -504,7 +751,7 @@ function renderKPI(){
     const tc={};wt.forEach(t=>{if(t.type)tc[t.type]=(tc[t.type]||0)+1;});
     const bars=wt.filter(t=>t.elapsed>0).sort((a,b)=>(b.elapsed||0)-(a.elapsed||0)).slice(0,5);
     const mx=bars.length?bars[0].elapsed:1;
-    return`<div class="kpi-card"><div class="kpi-header"><div class="kpi-avatar">${name.slice(0,2).toUpperCase()}</div><div><div class="kpi-name">${name}</div><div class="kpi-sub">${wt.length} งานเดือนนี้</div></div></div>
+    return`<div class="kpi-card"><div class="kpi-header"><div class="kpi-avatar">${(name||'?').slice(0,2).toUpperCase()}</div><div><div class="kpi-name">${name}</div><div class="kpi-sub">${wt.length} งานเดือนนี้</div></div></div>
       <div class="kpi-stats"><div class="kpi-stat"><div class="kpi-stat-val">${wt.length}</div><div class="kpi-stat-label">ทั้งหมด</div></div><div class="kpi-stat"><div class="kpi-stat-val" style="color:#0f6e56">${done}</div><div class="kpi-stat-label">เสร็จแล้ว</div></div><div class="kpi-stat"><div class="kpi-stat-val">${tel>0?fmtHM(tel):'-'}</div><div class="kpi-stat-label">เวลารวม</div></div></div>
       ${Object.entries(tc).length?`<div class="kpi-types">${Object.entries(tc).map(([k,v])=>`<span class="kpi-type-chip">${icon(k)} ${k} ×${v}</span>`).join('')}</div>`:''}
       ${bars.length?`<div class="kpi-bar-label">เวลาต่องาน</div>${bars.map(t=>`<div class="kpi-bar-row"><span class="kpi-bar-name">${icon(t.type)} ${t.name}</span><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${Math.round((t.elapsed/mx)*100)}%"></div></div><span class="kpi-bar-time">${fmtHM(t.elapsed)}</span></div>`).join('')}`:''}
@@ -513,18 +760,21 @@ function renderKPI(){
 }
 
 function renderCheckin(){
-  $('worker-ci-list').innerHTML=workers.map(w=>{
+  const isAdmin=currentProfile&&currentProfile.role==='admin';
+  const showWorkers=isAdmin?workers:workers.filter(w=>w.name===currentProfile.name);
+  $('worker-ci-list').innerHTML=showWorkers.map(w=>{
     const last=checkins.filter(c=>c.worker_name===w.name)[0];
     const isIn=last&&!last.check_out;
     return`<div class="worker-ci-item${isIn?' is-in':''}" onclick="handleCi('${w.name}')">
-      <div class="worker-ci-avatar">${w.name.slice(0,2).toUpperCase()}</div>
-      <div class="worker-ci-info"><div class="worker-ci-name">${w.name}</div><div class="worker-ci-status${isIn?' in':''}">${isIn?'✅ เข้างาน '+fmtClock(last.check_in):'ยังไม่เข้างาน'}</div></div>
+      <div class="worker-ci-avatar">${(w.name||'?').slice(0,2).toUpperCase()}</div>
+      <div style="flex:1"><div class="worker-ci-name">${w.name}</div><div class="worker-ci-status${isIn?' in':''}">${isIn?'✅ เข้างาน '+fmtClock(last.check_in):'ยังไม่เข้างาน'}</div></div>
       <button class="ci-action-btn ${isIn?'checkout':'checkin'}">${isIn?'Check-out':'Check-in'}</button>
     </div>`;
   }).join('');
   const body=$('ci-log-body');
-  if(!checkins.length){body.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">ยังไม่มีข้อมูลวันนี้</td></tr>';return;}
-  body.innerHTML=checkins.map(c=>{const dur=c.check_out?Math.round((new Date(c.check_out)-new Date(c.check_in))/60000):null;return`<tr><td><strong>${c.worker_name}</strong></td><td style="color:#0f6e56;font-weight:600">${fmtClock(c.check_in)}</td><td style="color:var(--muted)">${c.check_out?fmtClock(c.check_out):'ยังอยู่'}</td><td>${dur?`<span class="dur-badge">${Math.floor(dur/60)}ชม ${dur%60}น</span>`:'-'}</td><td style="color:var(--muted);font-size:11px">${c.note||'-'}</td></tr>`;}).join('');
+  const showLogs=isAdmin?checkins:checkins.filter(c=>c.worker_name===currentProfile.name);
+  if(!showLogs.length){body.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">ยังไม่มีข้อมูลวันนี้</td></tr>';return;}
+  body.innerHTML=showLogs.map(c=>{const dur=c.check_out?Math.round((new Date(c.check_out)-new Date(c.check_in))/60000):null;return`<tr><td><strong>${c.worker_name}</strong></td><td style="color:#0f6e56;font-weight:600">${fmtClock(c.check_in)}</td><td style="color:var(--muted)">${c.check_out?fmtClock(c.check_out):'ยังอยู่'}</td><td>${dur?`<span class="dur-badge">${Math.floor(dur/60)}ชม ${dur%60}น</span>`:'-'}</td><td style="color:var(--muted);font-size:11px">${c.note||'-'}</td></tr>`;}).join('');
 }
 
 function render(){
@@ -534,11 +784,13 @@ function render(){
   else if(page==='checkin')renderCheckin();
 }
 
-function switchPage(p){
+function switchPage(p,saveHash=true){
+  if(p!=='detail')prevPage=page;
   page=p;
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   $('page-'+p).classList.add('active');
   document.querySelectorAll('.nav button').forEach((b,i)=>{b.classList.toggle('active',['dashboard','calendar','kpi','checkin'][i]===p);});
+  if(saveHash)location.hash=p;
   render();
 }
 function changeMonth(d){cm+=d;if(cm>11){cm=0;cy++;}if(cm<0){cm=11;cy--;}render();}
@@ -577,12 +829,11 @@ function openTaskModal(id){
     $('f-due').value=t.due||'';$('f-deadline').value=t.deadline||'';$('f-progress').value=t.progress||0;$('f-note').value=t.note||'';
     selWorker=t.worker||'';selType=t.type||'';
     $('btn-delete').style.display='block';
-  } else {
+  }else{
     $('task-modal-title').textContent='เพิ่มงานใหม่';
     $('f-name').value='';$('f-priority').value='medium';$('f-status').value='todo';
     $('f-due').value='';$('f-deadline').value='';$('f-progress').value=0;$('f-note').value='';
-    selWorker='';selType='';
-    $('btn-delete').style.display='none';
+    selWorker='';selType='';$('btn-delete').style.display='none';
   }
   renderWorkerPicker(selWorker);renderTypePicker(selType);
   $('task-modal-wrap').classList.add('open');
@@ -596,17 +847,20 @@ async function saveTask(){
   try{
     if(editId){await upd('tasks',editId,d);const i=tasks.findIndex(t=>t.id===editId);if(i>-1)tasks[i]={...tasks[i],...d};}
     else{const nt={id:uid(),elapsed:0,...d};await ins('tasks',nt);tasks.push(nt);}
-    sync('ok');closeTaskModal();render();
+    sync('ok');closeTaskModal();
+    if(page==='detail'&&editId)renderDetail(editId);else render();
   }catch(e){sync('err');alert('บันทึกไม่สำเร็จ: '+e.message);}
 }
 async function deleteTask(){
   if(!editId)return;stopTimer(editId);sync('loading');
   await del('tasks',editId);tasks=tasks.filter(t=>t.id!==editId);
-  sync('ok');closeTaskModal();render();
+  sync('ok');closeTaskModal();switchPage('dashboard');
 }
 
 // Check-in
 function handleCi(name){
+  const isAdmin=currentProfile&&currentProfile.role==='admin';
+  if(!isAdmin&&name!==currentProfile.name)return;
   ciWorker=name;
   const last=checkins.filter(c=>c.worker_name===name)[0];
   const isIn=last&&!last.check_out;
@@ -621,13 +875,28 @@ async function confirmCi(){
   const last=checkins.filter(c=>c.worker_name===ciWorker)[0];
   const isIn=last&&!last.check_out;
   sync('loading');
-  if(isIn){await upd('checkins',last.id,{check_out:new Date().toISOString(),note:note||last.note});last.check_out=new Date().toISOString();}
-  else{const r=await ins('checkins',{worker_name:ciWorker,check_in:new Date().toISOString(),note});checkins.unshift(r[0]||{worker_name:ciWorker,check_in:new Date().toISOString(),note});}
+  if(isIn){
+    await upd('checkins',last.id,{check_out:thaiNow(),note:note||last.note});
+    last.check_out=thaiNow();
+  }else{
+    const r=await ins('checkins',{worker_name:ciWorker,check_in:thaiNow(),note});
+    checkins.unshift(r[0]||{worker_name:ciWorker,check_in:thaiNow(),note});
+  }
   sync('ok');closeCiModal();renderCheckin();
 }
 
-setInterval(loadAll,30000);
-loadAll();
+// INIT
+window.addEventListener('hashchange',()=>{
+  const h=location.hash.replace('#','');
+  if(['dashboard','calendar','kpi','checkin'].includes(h))switchPage(h,false);
+});
+
+(async()=>{
+  const ok=await restoreSession();
+  if(ok)startApp();
+})();
+
+setInterval(()=>{if(currentUser)loadAll();},30000);
 </script>
 </body>
 </html>
