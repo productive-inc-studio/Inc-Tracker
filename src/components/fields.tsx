@@ -219,6 +219,14 @@ export function DateField({
         type="date"
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value || null)}
+        // desktop browsers only open the calendar from their own icon, so open it from anywhere on the pill
+        onClick={(e) => {
+          try {
+            e.currentTarget.showPicker()
+          } catch {
+            /* unsupported: the browser's default behaviour still applies */
+          }
+        }}
         className="absolute inset-0 cursor-pointer opacity-0"
         aria-label={placeholder}
       />

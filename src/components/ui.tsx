@@ -54,15 +54,21 @@ export function Popover({
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number; maxHeight: number } | null>(null)
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
 
   useEffect(() => {
     if (!open || isMobile || !ref.current) return
     const r = ref.current.getBoundingClientRect()
-    const left = align === 'right' ? r.right - width : r.left
-    const top = r.bottom + 6
-    setPos({ top: Math.min(top, window.innerHeight - 80), left: Math.max(8, Math.min(left, window.innerWidth - width - 8)) })
+    const left = Math.max(8, Math.min(align === 'right' ? r.right - width : r.left, window.innerWidth - width - 8))
+    const below = window.innerHeight - r.bottom - 14
+    const above = r.top - 14
+    // open upward when the trigger sits near the bottom of the screen (e.g. the profile menu)
+    setPos(
+      below < 280 && above > below
+        ? { bottom: window.innerHeight - r.top + 6, left, maxHeight: above }
+        : { top: r.bottom + 6, left, maxHeight: below },
+    )
   }, [open, align, width, isMobile])
 
   useEffect(() => {
@@ -93,8 +99,8 @@ export function Popover({
             ) : (
               pos && (
                 <div
-                  style={{ top: pos.top, left: pos.left, width }}
-                  className="absolute max-h-[60vh] overflow-auto rounded-2xl border border-line bg-surface p-1.5 shadow-pop animate-fade-in"
+                  style={{ top: pos.top, bottom: pos.bottom, left: pos.left, width, maxHeight: Math.min(pos.maxHeight, window.innerHeight * 0.6) }}
+                  className="absolute overflow-auto rounded-2xl border border-line bg-surface p-1.5 shadow-pop animate-fade-in"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {children(close)}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Archive, ArchiveRestore, Check, Mail, Pencil, Plus, Trash2, UserX } from 'lucide-react'
+import { Archive, ArchiveRestore, Check, Copy, Mail, Pencil, Plus, Send, Trash2, UserX } from 'lucide-react'
 import { useAuth } from '../auth'
 import { api, keys, useLookups } from '../data/hooks'
 import { PROJECT_COLORS, ROLES, roleMeta } from '../lib/meta'
@@ -163,23 +163,50 @@ function Members() {
   )
 }
 
+const APP_URL = window.location.origin + import.meta.env.BASE_URL
+
+function inviteMessage(email: string, role: Invite['role']) {
+  return [
+    'คุณได้รับเชิญเข้าใช้ INC WorkTracker 🎉',
+    `สิทธิ์: ${roleMeta(role).label}`,
+    '',
+    `เข้าสู่ระบบด้วย Google โดยใช้อีเมล ${email} ที่`,
+    APP_URL,
+  ].join('\n')
+}
+
 function InviteBox({ invites }: { invites: Invite[] }) {
+  const toast = useToast()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<Invite['role']>('member')
-  const create = useMutate((v: { email: string; role: Invite['role'] }) => api.createInvite(v.email, v.role), [[...keys.invites]], 'เพิ่มคำเชิญแล้ว')
+  const [sharing, setSharing] = useState<{ email: string; role: Invite['role'] } | null>(null)
+  const create = useMutate((v: { email: string; role: Invite['role'] }) => api.createInvite(v.email, v.role), [[...keys.invites]])
   const del = useMutate((e: string) => api.deleteInvite(e), [[...keys.invites]])
   const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())
+
+  const msg = sharing ? inviteMessage(sharing.email, sharing.role) : ''
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(msg)
+      toast('คัดลอกข้อความเชิญแล้ว')
+    } catch {
+      toast('คัดลอกไม่ได้ ลองเลือกข้อความแล้วคัดลอกเอง', 'error')
+    }
+  }
 
   return (
     <section className="card p-4">
       <h2 className="text-sm font-bold">เชิญสมาชิกใหม่</h2>
-      <p className="mb-3 mt-0.5 text-xs text-muted">ใส่อีเมล Google ของคนที่จะเชิญ เมื่อเขา login ครั้งแรกจะได้สิทธิ์ตามที่ตั้งไว้ทันที</p>
+      <p className="mb-3 mt-0.5 text-xs text-muted">
+        ใส่อีเมล Google ของคนที่จะเชิญ แล้วส่งลิงก์ให้เขาทางอีเมลหรือ LINE เมื่อเขา login ครั้งแรกจะได้สิทธิ์ตามที่ตั้งไว้ทันที
+      </p>
       <form
         className="flex flex-col gap-2 sm:flex-row"
         onSubmit={(e) => {
           e.preventDefault()
           if (!valid) return
-          create.mutate({ email: email.trim().toLowerCase(), role })
+          const v = { email: email.trim().toLowerCase(), role }
+          create.mutate(v, { onSuccess: () => setSharing(v) })
           setEmail('')
         }}
       >
@@ -195,16 +222,63 @@ function InviteBox({ invites }: { invites: Invite[] }) {
         </div>
       </form>
       {invites.length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {invites.map((i) => (
-            <li key={i.email} className="chip h-8 pr-1">
-              {i.email} <span className="text-muted">· {roleMeta(i.role).label}</span>
-              <button className="grid h-6 w-6 place-items-center rounded-full text-muted hover:bg-danger/10 hover:text-danger" onClick={() => del.mutate(i.email)} aria-label="ยกเลิกคำเชิญ">
-                ×
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="mt-4 text-xs font-semibold text-muted">รอเข้าใช้งานครั้งแรก</div>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {invites.map((i) => (
+              <li key={i.email} className="chip h-8 pr-1">
+                {i.email} <span className="text-muted">· {roleMeta(i.role).label}</span>
+                <button
+                  className="grid h-6 w-6 place-items-center rounded-full text-muted hover:bg-brand/10 hover:text-brand"
+                  onClick={() => setSharing({ email: i.email, role: i.role })}
+                  aria-label="ส่งคำเชิญอีกครั้ง"
+                  title="ส่งคำเชิญอีกครั้ง"
+                >
+                  <Send size={13} />
+                </button>
+                <button
+                  className="grid h-6 w-6 place-items-center rounded-full text-muted hover:bg-danger/10 hover:text-danger"
+                  onClick={() => del.mutate(i.email)}
+                  aria-label="ยกเลิกคำเชิญ"
+                  title="ยกเลิกคำเชิญ"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {sharing && (
+        <Modal open onClose={() => setSharing(null)} title="ส่งคำเชิญ">
+          <p className="text-sm">
+            เพิ่ม <b>{sharing.email}</b> ในรายชื่อแล้ว ส่งลิงก์นี้ให้เขาเพื่อเข้าใช้งาน
+          </p>
+          <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-sunken p-3 font-sans text-sm">{msg}</pre>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <a
+              className="btn-outline h-10"
+              href={`mailto:${sharing.email}?subject=${encodeURIComponent('เชิญเข้าใช้ INC WorkTracker')}&body=${encodeURIComponent(msg)}`}
+            >
+              <Mail size={16} /> ส่งอีเมล
+            </a>
+            <a
+              className="btn h-10 bg-[#06C755] text-white hover:brightness-105"
+              href={`https://line.me/R/share?text=${encodeURIComponent(msg)}`}
+              target="_blank"
+              rel="noopener"
+            >
+              <Send size={16} /> ส่งทาง LINE
+            </a>
+            <button className="btn-outline h-10" onClick={copy}>
+              <Copy size={16} /> คัดลอกข้อความ
+            </button>
+          </div>
+          <p className="mt-4 rounded-xl bg-warn/10 p-3 text-xs text-warn">
+            ถ้าแอปใน Google Cloud ยังเป็นโหมด Testing ต้องเพิ่มอีเมลนี้ใน <b>Audience → Test users</b> ด้วย ไม่งั้นเขาจะ login ไม่ได้
+          </p>
+        </Modal>
       )}
     </section>
   )
