@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>นโยบายความเป็นส่วนตัว · INC WorkTracker</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#f5f4f9; --surface:#fff; --ink:#16141f; --muted:#6e6a80; --line:#e5e2ee; --brand:#6d4aff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d0c12; --surface:#17161e; --ink:#f2f1f7; --muted:#9a96aa; --line:#2c2938; --brand:#8b70ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.75 "Plus Jakarta Sans","IBM Plex Sans Thai",system-ui,sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:40px 16px 64px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:28px clamp(18px,4vw,40px); }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; margin-bottom:28px; text-decoration:none; color:var(--ink); }
+  .brand span { color:var(--brand); }
+  h1 { font-size:28px; line-height:1.3; margin:0 0 4px; }
+  h2 { font-size:17px; margin:30px 0 6px; }
+  p, li { color:var(--ink); }
+  .muted { color:var(--muted); font-size:13px; }
+  ul { padding-left:22px; margin:6px 0; }
+  a { color:var(--brand); }
+</style>
+</head>
+<body>
+<main>
+  <a class="brand" href="./">
+    <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="#6D4AFF"/><path d="M18 34l9 9 19-21" fill="none" stroke="#D4FF3A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>Work<span>Tracker</span></b>
+  </a>
+  <div class="card">
+    <h1>นโยบายความเป็นส่วนตัว</h1>
+    <p class="muted">INC WorkTracker · มีผลตั้งแต่ 17 ตุลาคม 2026</p>
+
+    <p>INC WorkTracker เป็นระบบติดตามงานภายในของทีม INC Studio ใช้ได้เฉพาะสมาชิกที่ได้รับเชิญหรืออนุมัติจากผู้ดูแลระบบเท่านั้น หน้านี้อธิบายว่าเราเก็บข้อมูลอะไร ใช้อย่างไร และคุณมีสิทธิ์อะไรบ้าง</p>
+
+    <h2>ข้อมูลที่เราเก็บ</h2>
+    <ul>
+      <li><b>ข้อมูลจากบัญชี Google</b> เมื่อคุณเข้าสู่ระบบ: ชื่อ อีเมล และรูปโปรไฟล์ เราไม่ได้รับรหัสผ่าน และไม่เข้าถึงอีเมล ไฟล์ หรือข้อมูลอื่นในบัญชี Google ของคุณ</li>
+      <li><b>ข้อมูลการทำงาน</b> ที่คุณหรือเพื่อนร่วมทีมบันทึก: งาน รายละเอียดงาน กำหนดส่ง สถานะ เวลาที่จับหรือบันทึกไว้ และคอมเมนต์</li>
+      <li><b>ข้อมูลที่จำเป็นต่อการเข้าสู่ระบบ</b> เช่น session token ที่เก็บในเบราว์เซอร์ของคุณ</li>
+    </ul>
+
+    <h2>เราใช้ข้อมูลเพื่อ</h2>
+    <ul>
+      <li>ยืนยันตัวตนและกำหนดสิทธิ์การเข้าถึง (Admin / Lead / Member)</li>
+      <li>แสดงงาน มอบหมายงาน และคำนวณสรุปผลงานรายเดือน เช่น จำนวนงานที่ปิด ชั่วโมงทำงาน และอัตราการส่งตรงเวลา</li>
+      <li>ส่งแจ้งเตือนเกี่ยวกับงาน (ชื่องาน ผู้รับผิดชอบ กำหนดส่ง) เข้ากลุ่ม LINE ของทีม เมื่อ Admin หรือ Lead เป็นผู้สั่งส่ง</li>
+    </ul>
+    <p>เราไม่ขาย ไม่ให้เช่า และไม่ใช้ข้อมูลของคุณเพื่อโฆษณา</p>
+
+    <h2>ใครเห็นข้อมูลของคุณ</h2>
+    <ul>
+      <li>สมาชิกในทีมเห็นชื่อและรูปโปรไฟล์ของกันและกัน</li>
+      <li>Member เห็นเฉพาะงานที่ตนเองรับผิดชอบหรือสร้าง ส่วน Admin และ Lead เห็นงานและเวลาทำงานของทั้งทีม</li>
+      <li>ผู้ให้บริการที่ระบบใช้งาน ได้แก่ Supabase (ฐานข้อมูลและการยืนยันตัวตน), GitHub Pages (โฮสต์หน้าเว็บ), Google (การเข้าสู่ระบบ) และ LINE (ข้อความแจ้งเตือน) ซึ่งประมวลผลข้อมูลเท่าที่จำเป็นต่อการให้บริการ</li>
+    </ul>
+
+    <h2>ข้อมูลจาก Google</h2>
+    <p>การใช้และการส่งต่อข้อมูลที่ได้รับจาก Google APIs ของ INC WorkTracker เป็นไปตาม <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a> รวมถึงข้อกำหนด Limited Use โดยเราใช้เพียงชื่อ อีเมล และรูปโปรไฟล์ เพื่อเข้าสู่ระบบและแสดงตัวตนของคุณในทีมเท่านั้น</p>
+
+    <h2>การเก็บรักษาและการลบข้อมูล</h2>
+    <p>ข้อมูลถูกเก็บไว้ตลอดช่วงที่คุณเป็นสมาชิกทีม เมื่อถูกปิดการเข้าถึง ประวัติงานและเวลาทำงานจะยังถูกเก็บไว้เพื่อใช้ในรายงานย้อนหลังของทีม คุณขอดู แก้ไข หรือลบข้อมูลส่วนตัวได้โดยติดต่อผู้ดูแลระบบตามช่องทางด้านล่าง</p>
+
+    <h2>ความปลอดภัย</h2>
+    <p>การเชื่อมต่อทั้งหมดเข้ารหัสด้วย HTTPS และสิทธิ์การเข้าถึงข้อมูลถูกบังคับที่ระดับฐานข้อมูล (Row Level Security) ผู้ที่ไม่ได้เข้าสู่ระบบหรือยังไม่ได้รับอนุมัติจะเข้าถึงข้อมูลไม่ได้</p>
+
+    <h2>การเปลี่ยนแปลงนโยบาย</h2>
+    <p>หากมีการเปลี่ยนแปลง เราจะปรับปรุงหน้านี้และวันที่มีผลด้านบน</p>
+
+    <h2>ติดต่อ</h2>
+    <p>INC Studio · <a href="mailto:productive.inc.studio@gmail.com">productive.inc.studio@gmail.com</a></p>
+  </div>
+</main>
+</body>
+</html>

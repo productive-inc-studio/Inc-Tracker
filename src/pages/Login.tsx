@@ -54,6 +54,11 @@ export function LoginPage() {
         {error && <p className="mt-3 text-center text-sm text-danger">{error}</p>}
         <p className="mt-4 text-center text-xs text-muted">ใช้ได้เฉพาะบัญชีที่ Admin เชิญหรืออนุมัติแล้ว</p>
       </div>
+      <p className="mt-4 text-center text-xs">
+        <a href={`${import.meta.env.BASE_URL}privacy.html`} className="text-muted underline hover:text-ink">
+          นโยบายความเป็นส่วนตัว
+        </a>
+      </p>
     </Shell>
   )
 }
