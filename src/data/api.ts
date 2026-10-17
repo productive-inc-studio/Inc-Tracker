@@ -1,4 +1,6 @@
-import type { Comment, Invite, Member, Project, Task, TaskInput, TaskType, TimeEntry } from '../lib/types'
+import type { Comment, Invite, Member, Project, Subtask, SubtaskInput, Task, TaskInput, TaskType, TimeEntry } from '../lib/types'
+
+export type LiveTable = 'tasks' | 'subtasks' | 'time' | 'comments'
 
 /** Everything the UI needs from the backend. Implemented by Supabase (real) and an in-memory demo (dev only). */
 export interface Api {
@@ -24,6 +26,12 @@ export interface Api {
   updateTask(id: string, patch: TaskInput): Promise<void>
   deleteTask(id: string): Promise<void>
 
+  /** Every subtask the current user can see. */
+  listSubtasks(): Promise<Subtask[]>
+  createSubtask(taskId: string, input: SubtaskInput & { title: string }): Promise<void>
+  updateSubtask(id: string, patch: SubtaskInput): Promise<void>
+  deleteSubtask(id: string): Promise<void>
+
   /** Entries that started in [from, to). */
   listTimeEntries(from: string, to: string): Promise<TimeEntry[]>
   listTaskTime(taskId: string): Promise<TimeEntry[]>
@@ -41,5 +49,5 @@ export interface Api {
   notifyLine(payload: { kind: 'summary' } | { kind: 'task'; task_id: string }): Promise<void>
 
   /** Subscribe to live changes; returns an unsubscribe function. */
-  subscribe(onChange: (table: 'tasks' | 'time' | 'comments') => void): () => void
+  subscribe(onChange: (table: LiveTable) => void): () => void
 }

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../auth'
-import { useTaskActions } from '../data/hooks'
+import { useSubtaskActions, useTaskActions } from '../data/hooks'
 import type { TaskInput } from '../lib/types'
 import { AssigneeField, DateField, EstimateField, PriorityField, ProjectField, StatusField, TypeField } from './fields'
 import { Modal } from './ui'
+import { DraftSubtasks } from './Subtasks'
 import { useToast } from './Toast'
 
 const blank = (me: string): TaskInput => ({
@@ -24,18 +25,26 @@ export function NewTaskModal({ defaults, onClose }: { defaults: TaskInput | null
   const { create, creating } = useTaskActions()
   const toast = useToast()
   const [form, setForm] = useState<TaskInput>(blank(me.id))
+  const [subtasks, setSubtasks] = useState<string[]>([])
+  const subtaskActions = useSubtaskActions()
   const set = (patch: TaskInput) => setForm((f) => ({ ...f, ...patch }))
 
   useEffect(() => {
-    if (defaults) setForm({ ...blank(me.id), ...defaults })
+    if (defaults) {
+      setForm({ ...blank(me.id), ...defaults })
+      setSubtasks([])
+    }
   }, [defaults, me.id])
 
   const submit = async (again: boolean) => {
     const title = form.title?.trim()
     if (!title) return
     try {
-      await create({ ...form, title })
-      toast('สร้างงานแล้ว ✨')
+      const task = await create({ ...form, title })
+      for (const [i, t] of subtasks.entries())
+        await subtaskActions.create(task.id, { title: t, assignee_id: form.assignee_id ?? null, position: i })
+      toast(subtasks.length ? `สร้างงานพร้อม ${subtasks.length} ข้อย่อยแล้ว ✨` : 'สร้างงานแล้ว ✨')
+      setSubtasks([])
       if (again) set({ title: '', description: '' })
       else onClose()
     } catch {
@@ -89,6 +98,7 @@ export function NewTaskModal({ defaults, onClose }: { defaults: TaskInput | null
         <TypeField value={form.type_id ?? null} onChange={(type_id) => set({ type_id })} />
         <EstimateField value={form.estimate_minutes ?? null} onChange={(estimate_minutes) => set({ estimate_minutes })} />
       </div>
+      <DraftSubtasks items={subtasks} onChange={setSubtasks} />
     </Modal>
   )
 }

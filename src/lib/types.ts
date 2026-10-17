@@ -55,6 +55,19 @@ export interface Task {
 
 export type TaskInput = Partial<Omit<Task, 'id' | 'created_at' | 'updated_at' | 'tracked_minutes' | 'completed_at'>>
 
+export interface Subtask {
+  id: string
+  task_id: string
+  title: string
+  status: Status
+  assignee_id: string | null
+  due_date: string | null
+  position: number
+  completed_at: string | null
+}
+
+export type SubtaskInput = Partial<Pick<Subtask, 'title' | 'status' | 'assignee_id' | 'due_date' | 'position'>>
+
 export interface TimeEntry {
   id: string
   task_id: string

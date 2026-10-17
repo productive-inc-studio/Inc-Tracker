@@ -98,6 +98,19 @@ export const supabaseApi: Api = {
     check(await supabase.from('wt_tasks').delete().eq('id', id))
   },
 
+  async listSubtasks() {
+    return check(await supabase.from('wt_subtasks').select('*').order('position'))
+  },
+  async createSubtask(taskId, input) {
+    check(await supabase.from('wt_subtasks').insert({ ...input, task_id: taskId }))
+  },
+  async updateSubtask(id, patch) {
+    check(await supabase.from('wt_subtasks').update(patch).eq('id', id))
+  },
+  async deleteSubtask(id) {
+    check(await supabase.from('wt_subtasks').delete().eq('id', id))
+  },
+
   async listTimeEntries(from, to) {
     return check(
       await supabase.from('wt_time_entries').select('*').gte('started_at', from).lt('started_at', to).order('started_at'),
@@ -162,6 +175,7 @@ export const supabaseApi: Api = {
     const channel = supabase
       .channel('wt-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_tasks' }, () => onChange('tasks'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_subtasks' }, () => onChange('subtasks'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_time_entries' }, () => onChange('time'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_comments' }, () => onChange('comments'))
       .subscribe()

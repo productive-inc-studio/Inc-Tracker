@@ -1,7 +1,7 @@
 // In-memory backend for local development (`npm run dev` → ?demo). Never used in production builds.
-import { addDays, format, startOfMonth, subMonths } from 'date-fns'
-import type { Api } from './api'
-import type { Comment, Invite, Member, Project, Task, TaskType, TimeEntry } from '../lib/types'
+import { addDays, format, parseISO, startOfMonth, subMonths } from 'date-fns'
+import type { Api, LiveTable } from './api'
+import type { Comment, Invite, Member, Project, Subtask, Task, TaskType, TimeEntry } from '../lib/types'
 
 const uid = () => crypto.randomUUID()
 const now = () => new Date().toISOString()
@@ -44,6 +44,7 @@ const prios: Task['priority'][] = ['normal', 'high', 'normal', 'urgent', 'low', 
 let tasks: Task[] = []
 let time: TimeEntry[] = []
 let comments: Comment[] = []
+let subtasks: Subtask[] = []
 
 ;(function seed() {
   const today = new Date()
@@ -82,6 +83,18 @@ let comments: Comment[] = []
     project_id: null, type_id: 't8', assignee_id: 'u-fah', created_by: 'u-fah', start_date: null, due_date: null,
     estimate_minutes: null, tracked_minutes: 0, completed_at: null, position: 999, created_at: now(), updated_at: now() })
   recompute()
+  // split a few tasks into subtasks, some handed to other people
+  const SPLITS = [['รวบรวม reference', 'ร่าง concept 3 แบบ', 'ส่งลูกค้าเลือก', 'แก้ตาม feedback'], ['เขียน script', 'ถ่ายทำ', 'ตัดต่อ rough cut', 'ใส่ซับ + สี']]
+  const thisMonth = tasks.filter((t) => t.due_date && t.due_date >= iso(startOfMonth(today))).slice(0, 8)
+  thisMonth.forEach((t, i) => {
+    SPLITS[i % 2].forEach((title, j) => {
+      const status: Task['status'] = t.status === 'done' ? 'done' : j < (i % 3) ? 'done' : j === i % 3 && t.status !== 'todo' ? 'in_progress' : 'todo'
+      subtasks.push({ id: uid(), task_id: t.id, title, status, position: j,
+        assignee_id: j === 2 && i % 2 === 0 ? workers[(i + 1) % workers.length] : t.assignee_id,
+        due_date: t.due_date ? iso(addDays(parseISO(t.due_date), j - 3)) : null,
+        completed_at: status === 'done' ? now() : null })
+    })
+  })
   comments.push({ id: uid(), task_id: tasks[0].id, member_id: 'u-lead', body: 'ลูกค้าขอโทนสีสดขึ้นอีกนิดนะ 🙏', created_at: now() })
 })()
 
@@ -100,9 +113,10 @@ export const demoUsers = members
 
 const me_ = () => members.find((m) => m.id === me)!
 const isManager = () => ['admin', 'lead'].includes(me_().role)
-const canSee = (t: Task) => isManager() || t.assignee_id === me || t.created_by === me
-const listeners = new Set<(t: 'tasks' | 'time' | 'comments') => void>()
-const emit = (t: 'tasks' | 'time' | 'comments') => setTimeout(() => listeners.forEach((l) => l(t)), 0)
+const canEdit = (t: Task) => isManager() || t.assignee_id === me || t.created_by === me
+const canSee = (t: Task) => canEdit(t) || subtasks.some((s) => s.task_id === t.id && s.assignee_id === me)
+const listeners = new Set<(t: LiveTable) => void>()
+const emit = (t: LiveTable) => setTimeout(() => listeners.forEach((l) => l(t)), 0)
 const wait = <T,>(v: T) => new Promise<T>((r) => setTimeout(() => r(structuredClone(v)), 80))
 function deny(): never { throw new Error('ไม่มีสิทธิ์ (demo)') }
 
@@ -157,6 +171,26 @@ export const demoApi: Api = {
     emit('tasks')
   },
   async deleteTask(id) { tasks = tasks.filter((t) => t.id !== id); emit('tasks') },
+
+  listSubtasks: () => wait(subtasks.filter((s) => { const t = tasks.find((x) => x.id === s.task_id); return t && canSee(t) })),
+  async createSubtask(taskId, input) {
+    const t = tasks.find((x) => x.id === taskId)
+    if (!t || !canEdit(t)) deny()
+    if (!isManager() && input.assignee_id && input.assignee_id !== me) deny()
+    subtasks.push({ id: uid(), task_id: taskId, status: 'todo', assignee_id: null, due_date: null, position: Date.now(), completed_at: null, ...input })
+    emit('subtasks')
+  },
+  async updateSubtask(id, patch) {
+    const s = subtasks.find((x) => x.id === id)
+    const t = s && tasks.find((x) => x.id === s.task_id)
+    if (!s || !t || !(canEdit(t) || s.assignee_id === me)) deny()
+    if (!isManager() && patch.assignee_id && patch.assignee_id !== me && patch.assignee_id !== s.assignee_id) deny()
+    if (patch.status && patch.status !== s.status) s.completed_at = patch.status === 'done' ? now() : null
+    Object.assign(s, patch)
+    if (patch.status && patch.status !== 'todo' && t.status === 'todo') { t.status = 'in_progress'; emit('tasks') }
+    emit('subtasks')
+  },
+  async deleteSubtask(id) { subtasks = subtasks.filter((s) => s.id !== id); emit('subtasks') },
 
   listTimeEntries: (from, to) =>
     wait(time.filter((e) => e.started_at >= from && e.started_at < to && (isManager() || e.member_id === me))),

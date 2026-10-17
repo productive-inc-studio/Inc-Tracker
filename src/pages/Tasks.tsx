@@ -22,7 +22,7 @@ import type { Status, Task } from '../lib/types'
 import { cn } from '../lib/utils'
 import { applyFilters, FilterBar, useFilters } from '../components/Filters'
 import { useUI } from '../components/Layout'
-import { DueLabel, TaskCard, TimeLabel } from '../components/TaskCard'
+import { DueLabel, SubtaskLabel, TaskCard, TimeLabel } from '../components/TaskCard'
 import { PriorityFlag, StatusBadge } from '../components/fields'
 import { Avatar, Empty, Segmented, Spinner } from '../components/ui'
 
@@ -269,6 +269,7 @@ function ListRow({ task, onOpen, assignee, showStatus }: { task: Task; onOpen: (
         </div>
         <div className="mt-0.5 flex items-center gap-2 md:hidden">
           <DueLabel task={task} />
+          <SubtaskLabel task={task} />
           <TimeLabel task={task} />
         </div>
       </div>
@@ -279,6 +280,9 @@ function ListRow({ task, onOpen, assignee, showStatus }: { task: Task; onOpen: (
           {p.name}
         </span>
       )}
+      <span className="hidden w-12 md:block">
+        <SubtaskLabel task={task} />
+      </span>
       <span className="hidden w-24 md:block">
         <TimeLabel task={task} />
       </span>

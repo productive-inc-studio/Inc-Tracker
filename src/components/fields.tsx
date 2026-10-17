@@ -90,7 +90,16 @@ export function PriorityField({ value, onChange }: { value: Priority; onChange: 
   )
 }
 
-export function AssigneeField({ value, onChange }: { value: string | null; onChange: (id: string | null) => void }) {
+export function AssigneeField({
+  value,
+  onChange,
+  compact,
+}: {
+  value: string | null
+  onChange: (id: string | null) => void
+  /** avatar-only trigger, for subtask rows */
+  compact?: boolean
+}) {
   const { me, isManager } = useAuth()
   const { members, member } = useLookups()
   const options = isManager ? members.filter((m) => m.role !== 'pending') : members.filter((m) => m.id === me.id)
@@ -99,12 +108,18 @@ export function AssigneeField({ value, onChange }: { value: string | null; onCha
     <Popover
       title="มอบหมายให้"
       width={250}
-      trigger={(open) => (
-        <Trigger onClick={open} empty={!current}>
-          {current ? <Avatar member={current} size={20} /> : <UserRound size={14} />}
-          <span className="truncate">{current?.full_name ?? 'มอบหมาย'}</span>
-        </Trigger>
-      )}
+      trigger={(open) =>
+        compact ? (
+          <button type="button" onClick={open} className="rounded-full transition hover:opacity-80" title={current?.full_name ?? 'มอบหมาย'}>
+            <Avatar member={current} size={24} />
+          </button>
+        ) : (
+          <Trigger onClick={open} empty={!current}>
+            {current ? <Avatar member={current} size={20} /> : <UserRound size={14} />}
+            <span className="truncate">{current?.full_name ?? 'มอบหมาย'}</span>
+          </Trigger>
+        )
+      }
     >
       {(close) => (
         <>
@@ -198,23 +213,28 @@ export function DateField({
   onChange,
   placeholder,
   tone,
+  compact,
 }: {
   value: string | null
   onChange: (d: string | null) => void
   placeholder: string
   tone?: 'danger' | 'warn' | 'muted'
+  /** smaller pill that shows only an icon when empty, for subtask rows */
+  compact?: boolean
 }) {
   return (
     <label
+      title={placeholder}
       className={cn(
-        'relative inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xl border px-2.5 text-xs font-semibold transition hover:bg-sunken',
+        'relative inline-flex cursor-pointer items-center gap-1.5 rounded-xl border text-xs font-semibold transition hover:bg-sunken',
+        compact ? 'h-7 px-2' : 'h-8 px-2.5',
         value ? 'border-line bg-surface' : 'border-dashed border-line text-muted',
         tone === 'danger' && 'border-danger/40 text-danger',
         tone === 'warn' && 'border-warn/40 text-warn',
       )}
     >
       <CalendarDays size={14} />
-      {value ? fmtDate(value, 'd MMM yy') : placeholder}
+      {value ? fmtDate(value, compact ? 'd MMM' : 'd MMM yy') : !compact && placeholder}
       <input
         type="date"
         value={value ?? ''}

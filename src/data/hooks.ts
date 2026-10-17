@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Api } from './api'
 import { supabaseApi } from './supabase'
 import { demoApi } from './demo'
-import type { Member, Task, TaskInput } from '../lib/types'
+import type { Member, Subtask, SubtaskInput, Task, TaskInput } from '../lib/types'
 import { useToast } from '../components/Toast'
 
 export const DEMO = import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')
@@ -16,6 +16,7 @@ export const keys = {
   projects: ['projects'] as const,
   types: ['types'] as const,
   tasks: ['tasks'] as const,
+  subtasks: ['subtasks'] as const,
   running: ['running'] as const,
   time: (from: string, to: string) => ['time', from, to] as const,
   taskTime: (id: string) => ['time', 'task', id] as const,
@@ -26,6 +27,7 @@ export const useMembers = () => useQuery({ queryKey: keys.members, queryFn: api.
 export const useProjects = () => useQuery({ queryKey: keys.projects, queryFn: api.listProjects })
 export const useTypes = () => useQuery({ queryKey: keys.types, queryFn: api.listTypes })
 export const useTasks = () => useQuery({ queryKey: keys.tasks, queryFn: api.listTasks })
+export const useSubtasks = () => useQuery({ queryKey: keys.subtasks, queryFn: api.listSubtasks })
 export const useRunning = () => useQuery({ queryKey: keys.running, queryFn: api.runningTimer })
 export const useTimeRange = (from: string, to: string) =>
   useQuery({ queryKey: keys.time(from, to), queryFn: () => api.listTimeEntries(from, to) })
@@ -57,6 +59,10 @@ export function useLiveUpdates() {
     () =>
       api.subscribe((table) => {
         if (table === 'tasks') qc.invalidateQueries({ queryKey: keys.tasks })
+        if (table === 'subtasks') {
+          qc.invalidateQueries({ queryKey: keys.subtasks })
+          qc.invalidateQueries({ queryKey: keys.tasks })
+        }
         if (table === 'time') {
           qc.invalidateQueries({ queryKey: ['time'] })
           qc.invalidateQueries({ queryKey: keys.running })
@@ -135,4 +141,51 @@ export function useTimerActions() {
   })
   const del = useMutation({ mutationFn: api.deleteTime, onSuccess: refresh, onError: fail })
   return { start: start.mutate, stop: stop.mutate, add: add.mutate, del: del.mutate, busy: start.isPending || stop.isPending }
+}
+
+/** Subtasks grouped by task, sorted by position. */
+export function useSubtasksByTask() {
+  const data = useSubtasks().data
+  return useMemo(() => {
+    const m = new Map<string, Subtask[]>()
+    for (const s of data ?? []) m.set(s.task_id, [...(m.get(s.task_id) ?? []), s])
+    for (const list of m.values()) list.sort((a, b) => a.position - b.position)
+    return m
+  }, [data])
+}
+
+export function useSubtaskActions() {
+  const qc = useQueryClient()
+  const toast = useToast()
+  const settle = () => {
+    qc.invalidateQueries({ queryKey: keys.subtasks })
+    qc.invalidateQueries({ queryKey: keys.tasks }) // parent may have moved to "in progress"
+  }
+  const onError = (e: Error) => {
+    toast(e.message, 'error')
+    settle()
+  }
+  const create = useMutation({
+    mutationFn: (v: { taskId: string; input: SubtaskInput & { title: string } }) => api.createSubtask(v.taskId, v.input),
+    onError,
+    onSettled: settle,
+  })
+  const update = useMutation({
+    mutationFn: (v: { id: string; patch: SubtaskInput }) => api.updateSubtask(v.id, v.patch),
+    onMutate: ({ id, patch }) =>
+      qc.setQueryData<Subtask[]>(keys.subtasks, (old) => old?.map((s) => (s.id === id ? { ...s, ...patch } : s))),
+    onError,
+    onSettled: settle,
+  })
+  const remove = useMutation({
+    mutationFn: (id: string) => api.deleteSubtask(id),
+    onMutate: (id) => qc.setQueryData<Subtask[]>(keys.subtasks, (old) => old?.filter((s) => s.id !== id)),
+    onError,
+    onSettled: settle,
+  })
+  return {
+    create: (taskId: string, input: SubtaskInput & { title: string }) => create.mutateAsync({ taskId, input }),
+    update: (id: string, patch: SubtaskInput) => update.mutate({ id, patch }),
+    remove: remove.mutate,
+  }
 }

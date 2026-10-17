@@ -1,5 +1,5 @@
-import { Clock } from 'lucide-react'
-import { useLookups, useRunning } from '../data/hooks'
+import { Clock, ListChecks } from 'lucide-react'
+import { useLookups, useRunning, useSubtasks } from '../data/hooks'
 import type { Task } from '../lib/types'
 import { cn, dueInfo, fmtMinutes } from '../lib/utils'
 import { PriorityFlag, StatusBadge } from './fields'
@@ -16,6 +16,18 @@ export function DueLabel({ task }: { task: Task }) {
       )}
     >
       {d.label}
+    </span>
+  )
+}
+
+export function SubtaskLabel({ task }: { task: Task }) {
+  const list = useSubtasks().data?.filter((s) => s.task_id === task.id)
+  if (!list?.length) return null
+  const done = list.filter((s) => s.status === 'done').length
+  return (
+    <span className={cn('inline-flex items-center gap-1 whitespace-nowrap text-xs tabular-nums', done === list.length ? 'text-ok' : 'text-muted')} title="ข้อย่อยที่เสร็จ">
+      <ListChecks size={13} />
+      {done}/{list.length}
     </span>
   )
 }
@@ -64,6 +76,7 @@ export function TaskCard({ task, onOpen, showStatus, dragging }: { task: Task; o
         {showStatus && <StatusBadge status={task.status} />}
         <PriorityFlag priority={task.priority} />
         <DueLabel task={task} />
+        <SubtaskLabel task={task} />
         <TimeLabel task={task} />
         {isRunning && <span className="h-2 w-2 animate-pulse rounded-full bg-brand" title="กำลังจับเวลา" />}
         <Avatar member={member(task.assignee_id)} size={24} className="ml-auto" />

@@ -10,6 +10,7 @@ import { cn, dueInfo, fmtClock, fmtDate, fmtMinutes } from '../lib/utils'
 import { useElapsed } from './Layout'
 import { AssigneeField, DateField, EstimateField, PriorityField, ProjectField, StatusField, TypeField } from './fields'
 import { Avatar, Spinner } from './ui'
+import { SubtaskList } from './Subtasks'
 import { useToast } from './Toast'
 
 export function TaskDrawer({ taskId, onClose }: { taskId: string; onClose: () => void }) {
@@ -64,6 +65,8 @@ function Body({ task, onClose }: { task: Task; onClose: () => void }) {
 
   const due = dueInfo(task)
   const canDelete = isManager || task.created_by === me.id
+  // someone who only owns a subtask can see the task but not edit it
+  const canEdit = isManager || task.assignee_id === me.id || task.created_by === me.id
   const set = (patch: Partial<Task>) => update(task.id, patch)
   const creator = member(task.created_by)
 
@@ -79,7 +82,9 @@ function Body({ task, onClose }: { task: Task; onClose: () => void }) {
         <button className="icon-btn md:hidden" onClick={onClose} aria-label="กลับ">
           <ArrowLeft size={19} />
         </button>
-        <StatusField value={task.status} onChange={(status) => set({ status })} />
+        <div className={cn(!canEdit && 'pointer-events-none')}>
+          <StatusField value={task.status} onChange={(status) => set({ status })} />
+        </div>
         <div className="ml-auto flex items-center">
           {isManager && (
             <button className="icon-btn" title="แจ้งเข้า LINE กลุ่ม" onClick={() => notify.mutate()} disabled={notify.isPending}>
@@ -109,6 +114,7 @@ function Body({ task, onClose }: { task: Task; onClose: () => void }) {
       <div className="flex-1 overflow-y-auto px-5 pb-10 pt-4">
         <textarea
           rows={1}
+          readOnly={!canEdit}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={() => title.trim() && title !== task.title && set({ title: title.trim() })}
@@ -120,7 +126,12 @@ function Body({ task, onClose }: { task: Task; onClose: () => void }) {
           {task.completed_at && <> · เสร็จ {fmtDate(task.completed_at, 'd MMM yy')}</>}
         </div>
 
-        <div className="mt-5 grid grid-cols-[96px_1fr] items-center gap-x-3 gap-y-2.5 text-sm">
+        {!canEdit && (
+          <div className="mt-3 rounded-xl bg-brand/10 px-3 py-2 text-xs font-medium text-brand">
+            คุณได้รับมอบหมายข้อย่อยในงานนี้ อัปเดตสถานะข้อย่อยของคุณได้ด้านล่าง
+          </div>
+        )}
+        <div className={cn('mt-5 grid grid-cols-[96px_1fr] items-center gap-x-3 gap-y-2.5 text-sm', !canEdit && 'pointer-events-none')}>
           <span className="text-muted">ผู้รับผิดชอบ</span>
           <div>
             <AssigneeField value={task.assignee_id} onChange={(assignee_id) => set({ assignee_id })} />
@@ -154,6 +165,7 @@ function Body({ task, onClose }: { task: Task; onClose: () => void }) {
 
         <Section title="Brief / รายละเอียด">
           <textarea
+            readOnly={!canEdit}
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             onBlur={() => desc !== task.description && set({ description: desc })}
@@ -162,6 +174,7 @@ function Body({ task, onClose }: { task: Task; onClose: () => void }) {
           />
         </Section>
 
+        <SubtaskList task={task} />
         <TimeSection task={task} onEstimate={(estimate_minutes) => set({ estimate_minutes })} />
         <CommentsSection taskId={task.id} />
       </div>
