@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Clock3, LogOut, ShieldAlert } from 'lucide-react'
-import { signInWithGoogle } from '../data/supabase'
+import { redirectError, signInWithGoogle } from '../data/supabase'
 import { api } from '../data/hooks'
 import type { Member } from '../lib/types'
 import { Logo } from '../components/Logo'
@@ -27,7 +27,7 @@ const GoogleIcon = () => (
 
 export function LoginPage() {
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(redirectError ? `Login ไม่สำเร็จ: ${redirectError}` : '')
   const go = async () => {
     setBusy(true)
     setError('')

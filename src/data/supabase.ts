@@ -7,6 +7,15 @@ const SUPABASE_URL = 'https://jsywdxdhycfjdbhgogjs.supabase.co'
 const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzeXdkeGRoeWNmamRiaGdvZ2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTg5NjgsImV4cCI6MjA5NjA3NDk2OH0.HctVq88sFh2Nwqga5_vfey4P85bdlybEevVXDsmr8n4'
 
+/** OAuth failures come back as ?error_description=… (or in the #fragment). supabase-js strips them during init,
+ *  so read the message before the client is created. */
+export const redirectError = (() => {
+  const url = new URL(window.location.href)
+  const msg = url.searchParams.get('error_description') ?? new URLSearchParams(url.hash.replace(/^#\/?/, '')).get('error_description')
+  if (msg) window.history.replaceState(null, '', url.origin + url.pathname + '#/')
+  return msg
+})()
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   // PKCE returns ?code= instead of a #access_token fragment, which would clash with the hash router.
   auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true },
