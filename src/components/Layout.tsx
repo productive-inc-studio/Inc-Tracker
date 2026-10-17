@@ -1,9 +1,9 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { NavLink, useSearchParams } from 'react-router-dom'
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link, NavLink, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { BarChart3, Home, LayoutGrid, LogOut, Moon, Plus, Square, Sun, Users } from 'lucide-react'
+import { BarChart3, Bell, Home, LayoutGrid, LogOut, Moon, Plus, Square, Sun, Users } from 'lucide-react'
 import { useAuth } from '../auth'
-import { DEMO, api, useLiveUpdates, useRunning, useTasks, useTimerActions } from '../data/hooks'
+import { DEMO, api, useLiveUpdates, useLookups, useNotifications, useRunning, useTasks, useTimerActions } from '../data/hooks'
 import { demoUsers, setDemoUser } from '../data/demo'
 import { roleMeta } from '../lib/meta'
 import type { TaskInput } from '../lib/types'
@@ -12,6 +12,8 @@ import { Logo } from './Logo'
 import { Avatar, Popover, MenuItem } from './ui'
 import { TaskDrawer } from './TaskDrawer'
 import { NewTaskModal } from './NewTaskModal'
+import { useToast } from './Toast'
+import { notificationText } from '../pages/Notifications'
 
 // ─── UI context: open the new-task modal / a task from anywhere ──────────────
 interface UI {
@@ -93,6 +95,57 @@ export function RunningTimer({ compact }: { compact?: boolean }) {
         </button>
       </div>
     </div>
+  )
+}
+
+// ─── Notifications: unread badge, tab title and a pop-up for new ones ────────
+function useUnread() {
+  return (useNotifications().data ?? []).filter((n) => !n.read_at).length
+}
+
+function NotificationWatcher() {
+  const list = useNotifications().data
+  const { member } = useLookups()
+  const toast = useToast()
+  const seen = useRef<Set<string> | null>(null)
+  const unread = (list ?? []).filter((n) => !n.read_at).length
+
+  useEffect(() => {
+    document.title = unread ? `(${unread}) INC WorkTracker` : 'INC WorkTracker'
+  }, [unread])
+
+  useEffect(() => {
+    if (!list) return
+    if (!seen.current) {
+      seen.current = new Set(list.map((n) => n.id)) // don't pop up what was already there on load
+      return
+    }
+    for (const n of list) {
+      if (seen.current.has(n.id)) continue
+      seen.current.add(n.id)
+      if (!n.read_at) toast(`🔔 ${notificationText(n, member(n.actor_id)?.full_name)}`)
+    }
+  }, [list, member, toast])
+  return null
+}
+
+function UnreadPill() {
+  const unread = useUnread()
+  if (!unread) return null
+  return <span className="ml-auto rounded-full bg-danger px-2 text-[11px] font-bold leading-5 text-white">{unread}</span>
+}
+
+function BellButton() {
+  const unread = useUnread()
+  return (
+    <Link to="/notifications" className="icon-btn relative" aria-label={`แจ้งเตือน${unread ? ` ${unread} รายการ` : ''}`}>
+      <Bell size={20} />
+      {unread > 0 && (
+        <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
+          {unread > 9 ? '9+' : unread}
+        </span>
+      )}
+    </Link>
   )
 }
 
@@ -183,6 +236,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <UICtx.Provider value={ui}>
+      <NotificationWatcher />
       <div className="flex min-h-full">
         {/* Desktop sidebar */}
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line bg-surface p-3 md:flex">
@@ -196,7 +250,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <Plus size={17} /> สร้างงาน
           </button>
           <nav className="mt-4 flex flex-col gap-0.5">
-            {NAV.map((n) => (
+            {[...NAV.slice(0, 1), { to: '/notifications', label: 'แจ้งเตือน', icon: Bell, end: false }, ...NAV.slice(1)].map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
@@ -209,6 +263,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 }
               >
                 <n.icon size={18} /> {n.label}
+                {n.to === '/notifications' && <UnreadPill />}
               </NavLink>
             ))}
           </nav>
@@ -227,6 +282,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </div>
             <div className="ml-auto flex items-center gap-1">
               <RunningTimer compact />
+              <BellButton />
               <UserMenu align="right" />
             </div>
           </header>

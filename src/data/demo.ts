@@ -1,7 +1,7 @@
 // In-memory backend for local development (`npm run dev` → ?demo). Never used in production builds.
 import { addDays, format, parseISO, startOfMonth, subMonths } from 'date-fns'
 import type { Api, LiveTable } from './api'
-import type { Comment, Invite, Member, Project, Subtask, Task, TaskType, TimeEntry } from '../lib/types'
+import type { AppNotification, Comment, Invite, Member, Project, Subtask, Task, TaskType, TimeEntry } from '../lib/types'
 
 const uid = () => crypto.randomUUID()
 const now = () => new Date().toISOString()
@@ -45,6 +45,7 @@ let tasks: Task[] = []
 let time: TimeEntry[] = []
 let comments: Comment[] = []
 let subtasks: Subtask[] = []
+let notifications: AppNotification[] = []
 
 ;(function seed() {
   const today = new Date()
@@ -95,6 +96,16 @@ let subtasks: Subtask[] = []
         completed_at: status === 'done' ? now() : null })
     })
   })
+  // a few notifications for everyone so the bell has something to show
+  for (const m of members) {
+    const mine = tasks.filter((t) => t.assignee_id === m.id && t.status !== 'done').slice(0, 2)
+    mine.forEach((t, i) =>
+      notifications.push({ id: uid(), recipient_id: m.id, actor_id: 'u-lead', kind: 'assigned', task_id: t.id, title: t.title, body: null,
+        read_at: i ? now() : null, created_at: new Date(Date.now() - (i + 1) * 3_600_000).toISOString() }),
+    )
+    if (mine[0]) notifications.push({ id: uid(), recipient_id: m.id, actor_id: 'u-admin', kind: 'comment', task_id: mine[0].id, title: mine[0].title,
+      body: 'ลูกค้าขอปรับโทนสีให้สดขึ้นนิดนึง', read_at: null, created_at: new Date(Date.now() - 20 * 60_000).toISOString() })
+  }
   comments.push({ id: uid(), task_id: tasks[0].id, member_id: 'u-lead', body: 'ลูกค้าขอโทนสีสดขึ้นอีกนิดนะ 🙏', created_at: now() })
 })()
 
@@ -118,6 +129,11 @@ const canSee = (t: Task) => canEdit(t) || subtasks.some((s) => s.task_id === t.i
 const listeners = new Set<(t: LiveTable) => void>()
 const emit = (t: LiveTable) => setTimeout(() => listeners.forEach((l) => l(t)), 0)
 const wait = <T,>(v: T) => new Promise<T>((r) => setTimeout(() => r(structuredClone(v)), 80))
+function notify(recipient: string | null, kind: AppNotification['kind'], task: Task, body: string | null = null, title = task.title) {
+  if (!recipient || recipient === me) return
+  notifications.push({ id: uid(), recipient_id: recipient, actor_id: me, kind, task_id: task.id, title, body, read_at: null, created_at: now() })
+  emit('notifications')
+}
 function deny(): never { throw new Error('ไม่มีสิทธิ์ (demo)') }
 
 export const demoApi: Api = {
@@ -159,6 +175,7 @@ export const demoApi: Api = {
       position: Date.now() / 1000, created_at: now(), updated_at: now(), ...input, created_by: me }
     if (t.status === 'done') t.completed_at = now()
     tasks.push(t)
+    notify(t.assignee_id, 'assigned', t)
     emit('tasks')
     return structuredClone(t)
   },
@@ -166,7 +183,11 @@ export const demoApi: Api = {
     const t = tasks.find((x) => x.id === id)
     if (!t || !canSee(t)) deny()
     if (!isManager() && patch.assignee_id && patch.assignee_id !== me) deny()
-    if (patch.status && patch.status !== t.status) t.completed_at = patch.status === 'done' ? now() : null
+    if (patch.status && patch.status !== t.status) {
+      t.completed_at = patch.status === 'done' ? now() : null
+      if (patch.status === 'done' || patch.status === 'review') notify(t.created_by, patch.status, t)
+    }
+    if (patch.assignee_id && patch.assignee_id !== t.assignee_id) notify(patch.assignee_id, 'assigned', { ...t, ...patch })
     Object.assign(t, patch, { updated_at: now() })
     emit('tasks')
   },
@@ -178,6 +199,7 @@ export const demoApi: Api = {
     if (!t || !canEdit(t)) deny()
     if (!isManager() && input.assignee_id && input.assignee_id !== me) deny()
     subtasks.push({ id: uid(), task_id: taskId, status: 'todo', assignee_id: null, due_date: null, position: Date.now(), completed_at: null, ...input })
+    notify(input.assignee_id ?? null, 'subtask_assigned', t, t.title, input.title)
     emit('subtasks')
   },
   async updateSubtask(id, patch) {
@@ -219,8 +241,21 @@ export const demoApi: Api = {
   async deleteTime(id) { time = time.filter((e) => e.id !== id); recompute(); emit('time'); emit('tasks') },
 
   listComments: (taskId) => wait(comments.filter((c) => c.task_id === taskId)),
-  async addComment(taskId, body) { comments.push({ id: uid(), task_id: taskId, member_id: me, body, created_at: now() }); emit('comments') },
+  async addComment(taskId, body) {
+    comments.push({ id: uid(), task_id: taskId, member_id: me, body, created_at: now() })
+    const t = tasks.find((x) => x.id === taskId)!
+    notify(t.assignee_id, 'comment', t, body)
+    if (t.created_by !== t.assignee_id) notify(t.created_by, 'comment', t, body)
+    emit('comments')
+  },
   async deleteComment(id) { comments = comments.filter((c) => c.id !== id); emit('comments') },
+
+  listNotifications: () =>
+    wait(notifications.filter((n) => n.recipient_id === me).sort((a, b) => b.created_at.localeCompare(a.created_at))),
+  async markNotificationsRead(ids) {
+    for (const n of notifications) if (n.recipient_id === me && !n.read_at && (!ids || ids.includes(n.id))) n.read_at = now()
+    emit('notifications')
+  },
 
   async notifyLine() { await wait(null) },
 

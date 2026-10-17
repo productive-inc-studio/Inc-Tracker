@@ -158,6 +158,14 @@ export const supabaseApi: Api = {
     check(await supabase.from('wt_comments').delete().eq('id', id))
   },
 
+  async listNotifications() {
+    return check(await supabase.from('wt_notifications').select('*').order('created_at', { ascending: false }).limit(60))
+  },
+  async markNotificationsRead(ids) {
+    const q = supabase.from('wt_notifications').update({ read_at: new Date().toISOString() }).is('read_at', null)
+    check(await (ids ? q.in('id', ids) : q))
+  },
+
   async notifyLine(payload) {
     const { error } = await supabase.functions.invoke('wt-line-notify', { body: payload })
     if (error) {
@@ -178,6 +186,7 @@ export const supabaseApi: Api = {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_subtasks' }, () => onChange('subtasks'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_time_entries' }, () => onChange('time'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_comments' }, () => onChange('comments'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wt_notifications' }, () => onChange('notifications'))
       .subscribe()
     return () => {
       supabase.removeChannel(channel)

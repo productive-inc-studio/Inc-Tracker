@@ -1,6 +1,6 @@
-import type { Comment, Invite, Member, Project, Subtask, SubtaskInput, Task, TaskInput, TaskType, TimeEntry } from '../lib/types'
+import type { AppNotification, Comment, Invite, Member, Project, Subtask, SubtaskInput, Task, TaskInput, TaskType, TimeEntry } from '../lib/types'
 
-export type LiveTable = 'tasks' | 'subtasks' | 'time' | 'comments'
+export type LiveTable = 'tasks' | 'subtasks' | 'time' | 'comments' | 'notifications'
 
 /** Everything the UI needs from the backend. Implemented by Supabase (real) and an in-memory demo (dev only). */
 export interface Api {
@@ -44,6 +44,11 @@ export interface Api {
   listComments(taskId: string): Promise<Comment[]>
   addComment(taskId: string, body: string): Promise<void>
   deleteComment(id: string): Promise<void>
+
+  /** The current user's latest notifications, newest first. */
+  listNotifications(): Promise<AppNotification[]>
+  /** Mark the given notifications (or all when omitted) as read. */
+  markNotificationsRead(ids?: string[]): Promise<void>
 
   /** Push a message to the studio LINE group via the edge function. */
   notifyLine(payload: { kind: 'summary' } | { kind: 'task'; task_id: string }): Promise<void>

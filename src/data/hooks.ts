@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Api } from './api'
 import { supabaseApi } from './supabase'
 import { demoApi } from './demo'
-import type { Member, Subtask, SubtaskInput, Task, TaskInput } from '../lib/types'
+import type { AppNotification, Member, Subtask, SubtaskInput, Task, TaskInput } from '../lib/types'
 import { useToast } from '../components/Toast'
 
 export const DEMO = import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')
@@ -17,6 +17,7 @@ export const keys = {
   types: ['types'] as const,
   tasks: ['tasks'] as const,
   subtasks: ['subtasks'] as const,
+  notifications: ['notifications'] as const,
   running: ['running'] as const,
   time: (from: string, to: string) => ['time', from, to] as const,
   taskTime: (id: string) => ['time', 'task', id] as const,
@@ -28,6 +29,7 @@ export const useProjects = () => useQuery({ queryKey: keys.projects, queryFn: ap
 export const useTypes = () => useQuery({ queryKey: keys.types, queryFn: api.listTypes })
 export const useTasks = () => useQuery({ queryKey: keys.tasks, queryFn: api.listTasks })
 export const useSubtasks = () => useQuery({ queryKey: keys.subtasks, queryFn: api.listSubtasks })
+export const useNotifications = () => useQuery({ queryKey: keys.notifications, queryFn: api.listNotifications })
 export const useRunning = () => useQuery({ queryKey: keys.running, queryFn: api.runningTimer })
 export const useTimeRange = (from: string, to: string) =>
   useQuery({ queryKey: keys.time(from, to), queryFn: () => api.listTimeEntries(from, to) })
@@ -68,6 +70,7 @@ export function useLiveUpdates() {
           qc.invalidateQueries({ queryKey: keys.running })
         }
         if (table === 'comments') qc.invalidateQueries({ queryKey: ['comments'] })
+        if (table === 'notifications') qc.invalidateQueries({ queryKey: keys.notifications })
       }),
     [qc],
   )
@@ -188,4 +191,19 @@ export function useSubtaskActions() {
     update: (id: string, patch: SubtaskInput) => update.mutate({ id, patch }),
     remove: remove.mutate,
   }
+}
+
+export function useMarkRead() {
+  const qc = useQueryClient()
+  const m = useMutation({
+    mutationFn: (ids?: string[]) => api.markNotificationsRead(ids),
+    onMutate: (ids) => {
+      const now = new Date().toISOString()
+      qc.setQueryData<AppNotification[]>(keys.notifications, (old) =>
+        old?.map((n) => (!n.read_at && (!ids || ids.includes(n.id)) ? { ...n, read_at: now } : n)),
+      )
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: keys.notifications }),
+  })
+  return m.mutate
 }

@@ -68,6 +68,20 @@ export interface Subtask {
 
 export type SubtaskInput = Partial<Pick<Subtask, 'title' | 'status' | 'assignee_id' | 'due_date' | 'position'>>
 
+export type NotificationKind = 'assigned' | 'subtask_assigned' | 'comment' | 'done' | 'review'
+
+export interface AppNotification {
+  id: string
+  recipient_id: string
+  actor_id: string | null
+  kind: NotificationKind
+  task_id: string | null
+  title: string
+  body: string | null
+  read_at: string | null
+  created_at: string
+}
+
 export interface TimeEntry {
   id: string
   task_id: string

@@ -7,6 +7,7 @@ import { HomePage } from './pages/Home'
 import { AuthErrorPage, FullLoader, LoginPage, PendingPage } from './pages/Login'
 import { TasksPage } from './pages/Tasks'
 import { TeamPage } from './pages/Team'
+import { NotificationsPage } from './pages/Notifications'
 import { Spinner } from './components/ui'
 
 const DashboardPage = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.DashboardPage })))
@@ -34,6 +35,7 @@ export function App() {
                 }
               />
               <Route path="/team" element={<TeamPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>
