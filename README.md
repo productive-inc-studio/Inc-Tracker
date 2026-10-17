@@ -41,9 +41,12 @@ GitHub repo → **Settings → Pages → Build and deployment → Source: GitHub
 > ⚠️ โทเคน LINE ตัวเก่าเคยอยู่ใน `index.html` ที่เปิดสาธารณะ — ให้ **ออกโทเคนใหม่** ก่อน
 
 1. [LINE Developers Console](https://developers.line.biz/console/) → channel ของบอท → Messaging API → **Channel access token → Reissue**
-2. Supabase Dashboard → **Edge Functions → Secrets** เพิ่ม
-   - `LINE_CHANNEL_TOKEN` = โทเคนใหม่
-   - `LINE_GROUP_ID` = ID ของกลุ่ม LINE (ขึ้นต้นด้วย `C...`)
+2. Supabase Dashboard → **Edge Functions → Secrets** เพิ่ม `LINE_CHANNEL_TOKEN` = โทเคนใหม่
+3. หา Group ID: ในแท็บ Messaging API ตั้ง **Webhook URL** เป็น
+   `https://jsywdxdhycfjdbhgogjs.supabase.co/functions/v1/wt-line-webhook` แล้วเปิด **Use webhook**
+   จากนั้นเชิญบอทเข้ากลุ่ม (หรือพิมพ์ `groupid` ในกลุ่มที่บอทอยู่แล้ว) บอทจะตอบ Group ID กลับมา
+4. เพิ่ม secret `LINE_GROUP_ID` = ค่าที่บอทตอบ (ขึ้นต้นด้วย `C...`)
+   (ไม่บังคับ) เพิ่ม `LINE_CHANNEL_SECRET` = Channel secret จากแท็บ Basic settings เพื่อให้ webhook ตรวจลายเซ็นของ LINE
 
 ### 4. เข้าใช้งานครั้งแรก
 - Login ด้วย **productive.inc.studio@gmail.com** → จะได้สิทธิ์ Admin อัตโนมัติ
