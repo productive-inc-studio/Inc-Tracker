@@ -3,3 +3,6 @@ dist
 .env.local
 .DS_Store
 *.tsbuildinfo
+
+# local DB backups (repo is public)
+supabase/backup/
